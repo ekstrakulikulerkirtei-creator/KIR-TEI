@@ -31,7 +31,8 @@
         .header-title p.subtitle { color: #666; margin: 0; text-align: left; }
         .version-badge { background-color: var(--primary-color); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; vertical-align: middle; margin-left: 5px; }
         
-        .dashboard { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+        /* DASHBOARD & FORM */
+        .dashboard { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
         .card { background-color: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; text-align: center; }
         .card h3 { margin: 0 0 10px 0; font-size: 16px; color: #555; }
         .card p { margin: 0; font-size: 24px; font-weight: bold; }
@@ -52,16 +53,21 @@
         .btn-logout { background-color: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-logout:hover { background-color: #5a6268; }
 
-        .table-section { background-color: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
+        /* FILTER & TABLES */
+        .filter-section { background-color: var(--primary-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; color: white; }
+        .filter-section label { color: white; }
+        
+        .table-section { background-color: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 20px; }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .table-header h3 { margin: 0; }
-        .search-box { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; width: 300px; max-width: 100%; box-sizing: border-box; }
+        .table-header h3 { margin: 0; color: var(--primary-color); }
+        .header-income { color: var(--income-color) !important; }
+        .header-expense { color: var(--expense-color) !important; }
+
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background-color: var(--primary-color); color: white; white-space: nowrap; }
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; color: white; font-weight: bold; display: inline-block; }
-        .badge-income { background-color: var(--income-color); }
-        .badge-expense { background-color: var(--expense-color); }
+        .th-income { background-color: var(--income-color); }
+        .th-expense { background-color: var(--expense-color); }
         
         .btn-delete { background-color: var(--expense-color); color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
         .btn-delete:hover { background-color: #bd2130; }
@@ -79,8 +85,6 @@
             .dashboard { flex-direction: column; gap: 15px; margin-bottom: 20px; }
             .card { padding: 15px; }
             .form-row { flex-direction: column; gap: 15px; margin-bottom: 15px; }
-            .table-header { flex-direction: column; align-items: stretch; }
-            .search-box { width: 100%; margin-top: 10px; }
             th, td { white-space: nowrap; font-size: 14px; padding: 10px; }
         }
     </style>
@@ -105,22 +109,47 @@
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.7</span></p>
+            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.8</span></p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
 
+    <!-- PANEL FILTER BARU -->
+    <div class="filter-section">
+        <div class="form-row" style="margin-bottom: 0;">
+            <div class="form-group">
+                <label for="filterBulan">Pilih Bulan:</label>
+                <input type="month" id="filterBulan">
+            </div>
+            <div class="form-group">
+                <label for="filterKategori">Kategori Transaksi:</label>
+                <select id="filterKategori">
+                    <option value="">-- Semua Kategori --</option>
+                    <option value="Setoran Harian">Setoran Harian</option>
+                    <option value="Belanja">Belanja</option>
+                    <option value="Keperluan Organisasi">Keperluan Organisasi</option>
+                    <option value="Dan Lain-Lain">Dan Lain-Lain</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="searchInput">Cari Uraian/Nominal:</label>
+                <input type="text" id="searchInput" placeholder="Ketik pencarian...">
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD: Angka akan menyesuaikan filter di atas -->
     <div class="dashboard">
         <div class="card">
-            <h3>Total Pemasukan</h3>
+            <h3>Total Pemasukan (Sesuai Filter)</h3>
             <p class="text-income" id="totalPemasukan">Rp 0</p>
         </div>
         <div class="card">
-            <h3>Total Pengeluaran</h3>
+            <h3>Total Pengeluaran (Sesuai Filter)</h3>
             <p class="text-expense" id="totalPengeluaran">Rp 0</p>
         </div>
         <div class="card">
-            <h3>Saldo Akhir</h3>
+            <h3>Laba / Saldo Akhir</h3>
             <p class="text-balance" id="saldoAkhir">Rp 0</p>
         </div>
     </div>
@@ -166,30 +195,50 @@
         </form>
     </div>
 
+    <!-- TABEL PEMASUKAN -->
     <div class="table-section">
         <div class="table-header">
-            <h3>Riwayat Transaksi</h3>
-            <input type="text" id="searchInput" class="search-box" placeholder="Cari transaksi...">
+            <h3 class="header-income">Riwayat Pemasukan</h3>
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>Tanggal</th>
-                    <th>Transaksi</th>
-                    <th>Uraian</th>
-                    <th>Jenis</th>
-                    <th>Jumlah / Harga</th>
-                    <th>Aksi</th>
+                    <th class="th-income">Tanggal</th>
+                    <th class="th-income">Kategori</th>
+                    <th class="th-income">Uraian</th>
+                    <th class="th-income">Jumlah</th>
+                    <th class="th-income">Aksi</th>
                 </tr>
             </thead>
-            <tbody id="tabelBody">
-                <tr><td colspan="6" class="empty-state">Memuat data dari server...</td></tr>
+            <tbody id="tabelBodyPemasukan">
+                <tr><td colspan="5" class="empty-state">Memuat data dari server...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TABEL PENGELUARAN -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3 class="header-expense">Riwayat Pengeluaran</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="th-expense">Tanggal</th>
+                    <th class="th-expense">Kategori</th>
+                    <th class="th-expense">Uraian</th>
+                    <th class="th-expense">Jumlah</th>
+                    <th class="th-expense">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tabelBodyPengeluaran">
+                <tr><td colspan="5" class="empty-state">Memuat data dari server...</td></tr>
             </tbody>
         </table>
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.7
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.8
     </div>
 </div>
 
@@ -253,33 +302,38 @@
         location.reload(); 
     };
 
-    // SISTEM KEUANGAN (FUNGSI UTAMA)
+    // SISTEM KEUANGAN
     const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
     let dataKeuangan = [];
+
+    // State untuk Filter
+    const today = new Date();
+    const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+    
+    // Set default value di UI
+    document.getElementById('filterBulan').value = currentMonth;
+    let filterBulan = currentMonth;
+    let filterKategori = "";
     let searchQuery = "";
 
     const formatRupiah = (angka) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     };
 
-    // FUNGSI BARU: Mengubah tipe tanggal agar mudah diurutkan browser
     const parseDateValue = (dateStr) => {
         if (!dateStr) return 0;
         const str = String(dateStr);
         const parts = str.split('-');
         if (parts.length === 3) {
             if (parts[0].length === 4) {
-                // Jika dari form baru YYYY-MM-DD
                 return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
             } else {
-                // Jika hasil muat dari Sheets DD-MM-YYYY
                 return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
             }
         }
         return new Date(str).getTime();
     };
 
-    // FUNGSI BARU: Menyeragamkan tampilan tanggal jadi DD-MM-YYYY
     const formatTanggalTampil = (dateStr) => {
         if (!dateStr) return '-';
         const str = String(dateStr);
@@ -297,78 +351,97 @@
             updateUI();
         } catch (err) {
             console.error("Gagal mengambil data:", err);
-            document.getElementById('tabelBody').innerHTML = `<tr><td colspan="6" class="empty-state" style="color:red;">Gagal memuat data. Cek koneksi / URL API Anda.</td></tr>`;
+            document.getElementById('tabelBodyPemasukan').innerHTML = `<tr><td colspan="5" class="empty-state" style="color:red;">Gagal memuat data. Cek koneksi.</td></tr>`;
+            document.getElementById('tabelBodyPengeluaran').innerHTML = `<tr><td colspan="5" class="empty-state" style="color:red;">Gagal memuat data. Cek koneksi.</td></tr>`;
         }
     };
 
     const updateUI = () => {
-        const tbody = document.getElementById('tabelBody');
-        tbody.innerHTML = '';
+        const tbodyMasuk = document.getElementById('tabelBodyPemasukan');
+        const tbodyKeluar = document.getElementById('tabelBodyPengeluaran');
         
+        tbodyMasuk.innerHTML = '';
+        tbodyKeluar.innerHTML = '';
+        
+        // 1. Urutkan Data Berdasarkan Tanggal Terbaru
+        let sortedData = [...dataKeuangan].sort((a, b) => parseDateValue(b.tanggal) - parseDateValue(a.tanggal));
+
+        // 2. Terapkan Filter (Bulan, Kategori, Pencarian)
+        let filteredData = sortedData.filter(item => {
+            // Ekstrak Bulan & Tahun dari item (Format YYYY-MM)
+            let itemMonth = "";
+            const timestamp = parseDateValue(item.tanggal);
+            if(timestamp) {
+                const d = new Date(timestamp);
+                itemMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            }
+
+            const matchBulan = filterBulan === "" || itemMonth === filterBulan;
+            const matchKategori = filterKategori === "" || item.transaksi === filterKategori;
+            
+            const query = searchQuery.toLowerCase();
+            const tglTampil = formatTanggalTampil(item.tanggal).toLowerCase();
+            const matchSearch = (tglTampil.includes(query)) ||
+                   (item.uraian && item.uraian.toLowerCase().includes(query)) ||
+                   (item.jumlah && item.jumlah.toString().includes(query));
+
+            return matchBulan && matchKategori && matchSearch;
+        });
+
+        // 3. Hitung Total & Cetak ke Tabel Terpisah
         let totalMasuk = 0;
         let totalKeluar = 0;
+        let countMasuk = 0;
+        let countKeluar = 0;
 
-        dataKeuangan.forEach((item) => {
-            if (!item.pendingDelete) {
-                const jumlah = Number(item.jumlah) || 0;
-                if (item.jenis === 'PEMASUKAN') totalMasuk += jumlah;
-                else totalKeluar += jumlah;
+        filteredData.forEach((item) => {
+            const isPending = item.pendingDelete;
+            const tr = document.createElement('tr');
+            if (isPending) tr.className = 'row-pending';
+
+            let actionHtml = '';
+            if (isPending) {
+                actionHtml = `<button id="btn-cancel-${item.id}" class="btn-cancel" onclick="batalHapus('${item.id}')">Batal (00:30)</button>`;
+            } else {
+                actionHtml = `<button class="btn-delete" onclick="konfirmasiHapus('${item.id}')">Hapus</button>`;
+            }
+
+            tr.innerHTML = `
+                <td>${formatTanggalTampil(item.tanggal)}</td>
+                <td>${item.transaksi}</td>
+                <td>${item.uraian || '-'}</td>
+                <td>${formatRupiah(item.jumlah)}</td>
+                <td>${actionHtml}</td>
+            `;
+
+            // Pisahkan ke Tabel dan Hitung Saldo
+            if (item.jenis === 'PEMASUKAN') {
+                if (!isPending) totalMasuk += (Number(item.jumlah) || 0);
+                tbodyMasuk.appendChild(tr);
+                countMasuk++;
+            } else {
+                if (!isPending) totalKeluar += (Number(item.jumlah) || 0);
+                tbodyKeluar.appendChild(tr);
+                countKeluar++;
             }
         });
 
-        // PERBAIKAN: Proses pengurutan kini menggunakan parseDateValue
-        let sortedData = [...dataKeuangan].sort((a, b) => parseDateValue(b.tanggal) - parseDateValue(a.tanggal));
+        // Tangani State Kosong
+        if (countMasuk === 0) tbodyMasuk.innerHTML = `<tr><td colspan="5" class="empty-state">Tidak ada pemasukan di filter ini.</td></tr>`;
+        if (countKeluar === 0) tbodyKeluar.innerHTML = `<tr><td colspan="5" class="empty-state">Tidak ada pengeluaran di filter ini.</td></tr>`;
 
-        let displayData = sortedData.filter(item => {
-            const query = searchQuery.toLowerCase();
-            const tglTampil = formatTanggalTampil(item.tanggal).toLowerCase();
-            return (tglTampil.includes(query)) ||
-                   (item.transaksi && item.transaksi.toLowerCase().includes(query)) ||
-                   (item.uraian && item.uraian.toLowerCase().includes(query)) ||
-                   (item.jenis && item.jenis.toLowerCase().includes(query)) ||
-                   (item.jumlah && item.jumlah.toString().includes(query));
-        });
-
-        if (displayData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Tidak ada transaksi yang ditemukan.</td></tr>`;
-        } else {
-            displayData.forEach((item) => {
-                const tr = document.createElement('tr');
-                const isPending = item.pendingDelete;
-                if (isPending) tr.className = 'row-pending';
-
-                const badgeClass = item.jenis === 'PEMASUKAN' ? 'badge-income' : 'badge-expense';
-                const jenisBadge = `<span class="badge ${badgeClass}">${item.jenis}</span>`;
-
-                let actionHtml = '';
-                if (isPending) {
-                    actionHtml = `<button id="btn-cancel-${item.id}" class="btn-cancel" onclick="batalHapus('${item.id}')">Batal (00:30)</button>`;
-                } else {
-                    actionHtml = `<button class="btn-delete" onclick="konfirmasiHapus('${item.id}')">Hapus</button>`;
-                }
-
-                tr.innerHTML = `
-                    <td>${formatTanggalTampil(item.tanggal)}</td>
-                    <td>${item.transaksi}</td>
-                    <td>${item.uraian || '-'}</td>
-                    <td>${jenisBadge}</td>
-                    <td>${formatRupiah(item.jumlah)}</td>
-                    <td>${actionHtml}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
+        // Update Dashboard
         const saldo = totalMasuk - totalKeluar;
         document.getElementById('totalPemasukan').innerText = formatRupiah(totalMasuk);
         document.getElementById('totalPengeluaran').innerText = formatRupiah(totalKeluar);
         document.getElementById('saldoAkhir').innerText = formatRupiah(saldo);
     };
 
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        searchQuery = e.target.value;
-        updateUI();
-    });
+    // Event Listener untuk Filter
+    document.getElementById('filterBulan').addEventListener('change', function(e) { filterBulan = e.target.value; updateUI(); });
+    document.getElementById('filterKategori').addEventListener('change', function(e) { filterKategori = e.target.value; updateUI(); });
+    document.getElementById('searchInput').addEventListener('input', function(e) { searchQuery = e.target.value; updateUI(); });
+
 
     const konfirmasiHapus = async (id) => {
         if (!id || id === 'undefined') {
@@ -379,36 +452,23 @@
         const item = dataKeuangan.find(x => String(x.id) === String(id));
         if(!item) return;
 
-        // 1. Minta PIN Khusus Hapus
         const inputPass = prompt("Masukkan PIN Khusus (4 Angka) untuk menghapus data ini:");
         if (inputPass === null) return; 
-        if (inputPass === "") {
-            alert("PIN Hapus tidak boleh kosong!");
-            return;
-        }
+        if (inputPass === "") { alert("PIN Hapus tidak boleh kosong!"); return; }
 
-        // 2. Verifikasi PIN Hapus ke Server
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ action: 'verify_delete', password: inputPass })
             });
-            
             const result = await response.json();
-            
-            if (result.status !== "success") {
-                alert("PIN Hapus SALAH! Penghapusan dibatalkan.");
-                return;
-            }
+            if (result.status !== "success") { alert("PIN Hapus SALAH! Penghapusan dibatalkan."); return; }
         } catch (error) {
-            alert("Gagal memverifikasi PIN Hapus ke server.");
-            return;
+            alert("Gagal memverifikasi PIN Hapus ke server."); return;
         }
 
-        // 3. Jika PIN Hapus Benar, Jalankan Konfirmasi dan Timer
-        const konfirmasi = confirm("PIN Hapus Benar!\nApakah Anda yakin ingin menghapus data ini? Penghapusan akan diproses permanen dalam 30 detik.");
-        
+        const konfirmasi = confirm("PIN Hapus Benar!\nApakah Anda yakin ingin menghapus data ini? Penghapusan permanen dalam 30 detik.");
         if (konfirmasi) {
             item.pendingDelete = true;
             item.timeLeft = 30; 
@@ -426,16 +486,13 @@
 
                 if (item.timeLeft <= 0) {
                     clearInterval(item.intervalId);
-                    
                     try {
                         await fetch(API_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify({ action: 'delete', id: String(id) })
                         });
-                    } catch (error) {
-                        console.error("Gagal menghapus di server:", error);
-                    }
+                    } catch (error) { console.error("Gagal menghapus di server:", error); }
 
                     dataKeuangan = dataKeuangan.filter(x => String(x.id) !== String(id));
                     updateUI();
@@ -479,8 +536,21 @@
             });
 
             dataKeuangan.push(transaksiBaru);
+            
+            // Jika tanggal transaksi baru bukan di bulan yang sedang difilter, ubah filter ke bulan transaksi tersebut
+            const tglBaru = new Date(transaksiBaru.tanggal);
+            const bulanBaru = tglBaru.getFullYear() + '-' + String(tglBaru.getMonth() + 1).padStart(2, '0');
+            if (filterBulan !== "" && filterBulan !== bulanBaru) {
+                filterBulan = bulanBaru;
+                document.getElementById('filterBulan').value = bulanBaru;
+            }
+
             updateUI();
             this.reset();
+            
+            // Set kembali tanggal ke hari ini sebagai default (opsional)
+            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+
         } catch (err) {
             alert("Gagal menyimpan data ke server online. Cek koneksi atau URL Apps Script Anda.");
         } finally {
@@ -491,6 +561,9 @@
 
     // Jalankan pengecekan login saat halaman pertama kali dibuka
     cekLogin();
+    
+    // Set default tanggal form transaksi ke hari ini
+    document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 </script>
 
 </body>

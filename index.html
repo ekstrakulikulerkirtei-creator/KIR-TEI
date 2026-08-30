@@ -105,7 +105,7 @@
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.6</span></p>
+            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.7</span></p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
@@ -189,7 +189,7 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.6
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.7
     </div>
 </div>
 
@@ -262,6 +262,34 @@
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     };
 
+    // FUNGSI BARU: Mengubah tipe tanggal agar mudah diurutkan browser
+    const parseDateValue = (dateStr) => {
+        if (!dateStr) return 0;
+        const str = String(dateStr);
+        const parts = str.split('-');
+        if (parts.length === 3) {
+            if (parts[0].length === 4) {
+                // Jika dari form baru YYYY-MM-DD
+                return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
+            } else {
+                // Jika hasil muat dari Sheets DD-MM-YYYY
+                return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            }
+        }
+        return new Date(str).getTime();
+    };
+
+    // FUNGSI BARU: Menyeragamkan tampilan tanggal jadi DD-MM-YYYY
+    const formatTanggalTampil = (dateStr) => {
+        if (!dateStr) return '-';
+        const str = String(dateStr);
+        const parts = str.split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`; 
+        }
+        return str; 
+    };
+
     const muatDataOnline = async () => {
         try {
             const res = await fetch(API_URL);
@@ -288,11 +316,13 @@
             }
         });
 
-        let sortedData = [...dataKeuangan].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        // PERBAIKAN: Proses pengurutan kini menggunakan parseDateValue
+        let sortedData = [...dataKeuangan].sort((a, b) => parseDateValue(b.tanggal) - parseDateValue(a.tanggal));
 
         let displayData = sortedData.filter(item => {
             const query = searchQuery.toLowerCase();
-            return (item.tanggal && item.tanggal.toString().toLowerCase().includes(query)) ||
+            const tglTampil = formatTanggalTampil(item.tanggal).toLowerCase();
+            return (tglTampil.includes(query)) ||
                    (item.transaksi && item.transaksi.toLowerCase().includes(query)) ||
                    (item.uraian && item.uraian.toLowerCase().includes(query)) ||
                    (item.jenis && item.jenis.toLowerCase().includes(query)) ||
@@ -318,7 +348,7 @@
                 }
 
                 tr.innerHTML = `
-                    <td>${item.tanggal}</td>
+                    <td>${formatTanggalTampil(item.tanggal)}</td>
                     <td>${item.transaksi}</td>
                     <td>${item.uraian || '-'}</td>
                     <td>${jenisBadge}</td>
@@ -351,7 +381,7 @@
 
         // 1. Minta PIN Khusus Hapus
         const inputPass = prompt("Masukkan PIN Khusus (4 Angka) untuk menghapus data ini:");
-        if (inputPass === null) return; // Jika klik Cancel
+        if (inputPass === null) return; 
         if (inputPass === "") {
             alert("PIN Hapus tidak boleh kosong!");
             return;

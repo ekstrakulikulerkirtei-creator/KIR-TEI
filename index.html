@@ -403,7 +403,8 @@
 
                 let actionHtml = '';
                 if (isPending) {
-                    actionHtml = `<button id="btn-cancel-${item.id}" class="btn-cancel" onclick="batalHapus('${item.id}')">Batal (02:00)</button>`;
+                    // DIUBAH: Teks awal tombol batal disesuaikan jadi 30 detik
+                    actionHtml = `<button id="btn-cancel-${item.id}" class="btn-cancel" onclick="batalHapus('${item.id}')">Batal (00:30)</button>`;
                 } else {
                     actionHtml = `<button class="btn-delete" onclick="konfirmasiHapus('${item.id}')">Hapus</button>`;
                 }
@@ -432,7 +433,6 @@
     });
 
     const konfirmasiHapus = (id) => {
-        // Cek apakah ID kosong (Jika pengguna ketik manual di spreadsheet, ID akan undefined)
         if (!id || id === 'undefined') {
             alert("Gagal menghapus! Data ini tidak memiliki ID unik karena ditambahkan secara manual dari Google Sheet. Hapus manual dari Sheet Anda.");
             return;
@@ -441,11 +441,12 @@
         const item = dataKeuangan.find(x => String(x.id) === String(id));
         if(!item) return;
 
-        const konfirmasi = confirm("Apakah Anda yakin ingin menghapus data ini?\nPenghapusan akan diproses permanen dalam 2 menit.");
+        // DIUBAH: Pesan konfirmasi menjadi 30 detik
+        const konfirmasi = confirm("Apakah Anda yakin ingin menghapus data ini?\nPenghapusan akan diproses permanen dalam 30 detik.");
         
         if (konfirmasi) {
             item.pendingDelete = true;
-            item.timeLeft = 120; 
+            item.timeLeft = 30; // DIUBAH: Waktu tunggu dari 120 menjadi 30
             updateUI(); 
 
             item.intervalId = setInterval(async () => {
@@ -453,8 +454,8 @@
                 
                 const btn = document.getElementById(`btn-cancel-${item.id}`);
                 if (btn) {
-                    const menit = Math.floor(item.timeLeft / 0);
-                    const detik = item.timeLeft % 30;
+                    const menit = Math.floor(item.timeLeft / 60);
+                    const detik = item.timeLeft % 60;
                     btn.innerText = `Batal (${menit < 10 ? '0' : ''}${menit}:${detik < 10 ? '0' : ''}${detik})`;
                 }
 
@@ -462,7 +463,6 @@
                     clearInterval(item.intervalId);
                     
                     try {
-                        // Header text/plain ditambahkan agar tidak di-block oleh CORS
                         await fetch(API_URL, {
                             method: 'POST',
                             headers: {
@@ -474,7 +474,6 @@
                         console.error("Gagal menghapus di server:", error);
                     }
 
-                    // Hapus dari tampilan
                     dataKeuangan = dataKeuangan.filter(x => String(x.id) !== String(id));
                     updateUI();
                 }
@@ -532,6 +531,6 @@
     // Jalankan pertama kali
     muatDataOnline();
 </script>
-
+    
 </body>
 </html>

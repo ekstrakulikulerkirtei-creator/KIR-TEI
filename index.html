@@ -40,7 +40,7 @@
         .text-expense { color: var(--expense-color); }
         .text-balance { color: var(--primary-color); }
 
-        .form-section { background-color: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .form-section { background-color: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .form-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
         label { margin-bottom: 5px; font-weight: bold; font-size: 14px; }
@@ -52,6 +52,13 @@
         
         .btn-logout { background-color: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-logout:hover { background-color: #5a6268; }
+
+        /* TOMBOL NAVIGASI HALAMAN */
+        .btn-nav { background-color: #17a2b8; color: white; border: none; padding: 15px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.3s; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .btn-nav:hover { background-color: #138496; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .btn-back { background-color: #6c757d; color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-weight: bold; margin: 0; }
+        .btn-back:hover { background-color: #5a6268; }
 
         /* FILTER & TABLES */
         .filter-section { background-color: var(--primary-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; color: white; }
@@ -86,6 +93,7 @@
             .card { padding: 15px; }
             .form-row { flex-direction: column; gap: 15px; margin-bottom: 15px; }
             th, td { white-space: nowrap; font-size: 14px; padding: 10px; }
+            .history-header { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -106,23 +114,25 @@
 
 <!-- APLIKASI UTAMA -->
 <div id="appContent" class="container hidden">
+    
+    <!-- HEADER (Terlihat di semua halaman) -->
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.8</span></p>
+            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.9</span></p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
 
-    <!-- PANEL FILTER BARU -->
+    <!-- PANEL FILTER GLOBAL (Berlaku untuk Dashboard & Riwayat) -->
     <div class="filter-section">
         <div class="form-row" style="margin-bottom: 0;">
             <div class="form-group">
-                <label for="filterBulan">Pilih Bulan:</label>
+                <label for="filterBulan">Pilih Bulan (Dashboard & Riwayat):</label>
                 <input type="month" id="filterBulan">
             </div>
             <div class="form-group">
-                <label for="filterKategori">Kategori Transaksi:</label>
+                <label for="filterKategori">Filter Kategori:</label>
                 <select id="filterKategori">
                     <option value="">-- Semua Kategori --</option>
                     <option value="Setoran Harian">Setoran Harian</option>
@@ -131,114 +141,128 @@
                     <option value="Dan Lain-Lain">Dan Lain-Lain</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="searchInput">Cari Uraian/Nominal:</label>
-                <input type="text" id="searchInput" placeholder="Ketik pencarian...">
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- BAGIAN 1: HALAMAN BERANDA (DASHBOARD & FORM)-->
+    <!-- ========================================== -->
+    <div id="halamanUtama">
+        <div class="dashboard">
+            <div class="card">
+                <h3>Total Pemasukan (Bulan Ini)</h3>
+                <p class="text-income" id="totalPemasukan">Rp 0</p>
+            </div>
+            <div class="card">
+                <h3>Total Pengeluaran (Bulan Ini)</h3>
+                <p class="text-expense" id="totalPengeluaran">Rp 0</p>
+            </div>
+            <div class="card">
+                <h3>Laba / Saldo Akhir</h3>
+                <p class="text-balance" id="saldoAkhir">Rp 0</p>
             </div>
         </div>
+
+        <div class="form-section">
+            <h3>Tambah Transaksi Baru</h3>
+            <form id="formTransaksi">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal</label>
+                        <input type="date" id="tanggal" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaksi">Kategori Transaksi</label>
+                        <select id="transaksi" required>
+                            <option value="" disabled selected>-- Pilih Kategori --</option>
+                            <option value="Setoran Harian">Setoran Harian</option>
+                            <option value="Belanja">Belanja</option>
+                            <option value="Keperluan Organisasi">Keperluan Organisasi</option>
+                            <option value="Dan Lain-Lain">Dan Lain-Lain</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="uraian">Uraian</label>
+                        <input type="text" id="uraian" placeholder="Penjelasan transaksi">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jenis">Jenis Transaksi</label>
+                        <select id="jenis" required>
+                             <option value="" disabled selected>-- Pilih jenis --</option>
+                            <option value="PEMASUKAN">Pemasukan</option>
+                            <option value="PENGELUARAN">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jumlah">Jumlah/Harga (Rp)</label>
+                        <input type="number" id="jumlah" min="0" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="btnSubmit">Simpan Transaksi</button>
+            </form>
+        </div>
+
+        <!-- Tombol Pindah Halaman -->
+        <button class="btn-nav" onclick="bukaRiwayat()">Lihat Riwayat Transaksi Lengkap ➔</button>
     </div>
 
-    <!-- DASHBOARD: Angka akan menyesuaikan filter di atas -->
-    <div class="dashboard">
-        <div class="card">
-            <h3>Total Pemasukan (Sesuai Filter)</h3>
-            <p class="text-income" id="totalPemasukan">Rp 0</p>
+    <!-- ========================================== -->
+    <!-- BAGIAN 2: HALAMAN RIWAYAT (TABEL TERPISAH) -->
+    <!-- ========================================== -->
+    <div id="halamanRiwayat" class="hidden">
+        
+        <div class="history-header">
+            <button class="btn-back" onclick="kembaliKeUtama()">🡄 Kembali ke Beranda</button>
+            <input type="text" id="searchInput" style="width: 100%; max-width: 350px; margin: 0;" placeholder="Cari Uraian/Nominal di riwayat...">
         </div>
-        <div class="card">
-            <h3>Total Pengeluaran (Sesuai Filter)</h3>
-            <p class="text-expense" id="totalPengeluaran">Rp 0</p>
-        </div>
-        <div class="card">
-            <h3>Laba / Saldo Akhir</h3>
-            <p class="text-balance" id="saldoAkhir">Rp 0</p>
-        </div>
-    </div>
 
-    <div class="form-section">
-        <h3>Tambah Transaksi Baru</h3>
-        <form id="formTransaksi">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tanggal">Tanggal</label>
-                    <input type="date" id="tanggal" required>
-                </div>
-                <div class="form-group">
-                    <label for="transaksi">Kategori Transaksi</label>
-                    <select id="transaksi" required>
-                        <option value="" disabled selected>-- Pilih Kategori --</option>
-                        <option value="Setoran Harian">Setoran Harian</option>
-                        <option value="Belanja">Belanja</option>
-                        <option value="Keperluan Organisasi">Keperluan Organisasi</option>
-                        <option value="Dan Lain-Lain">Dan Lain-Lain</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="uraian">Uraian</label>
-                    <input type="text" id="uraian" placeholder="Penjelasan transaksi">
-                </div>
+        <!-- TABEL PEMASUKAN -->
+        <div class="table-section">
+            <div class="table-header">
+                <h3 class="header-income">Riwayat Pemasukan</h3>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="jenis">Jenis Transaksi</label>
-                    <select id="jenis" required>
-                         <option value="" disabled selected>-- Pilih jenis --</option>
-                        <option value="PEMASUKAN">Pemasukan</option>
-                        <option value="PENGELUARAN">Pengeluaran</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="jumlah">Jumlah/Harga (Rp)</label>
-                    <input type="number" id="jumlah" min="0" required>
-                </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="th-income">Tanggal</th>
+                        <th class="th-income">Kategori</th>
+                        <th class="th-income">Uraian</th>
+                        <th class="th-income">Jumlah</th>
+                        <th class="th-income">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelBodyPemasukan">
+                    <tr><td colspan="5" class="empty-state">Memuat data dari server...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TABEL PENGELUARAN -->
+        <div class="table-section">
+            <div class="table-header">
+                <h3 class="header-expense">Riwayat Pengeluaran</h3>
             </div>
-            <button type="submit" class="btn-submit" id="btnSubmit">Simpan Transaksi</button>
-        </form>
-    </div>
-
-    <!-- TABEL PEMASUKAN -->
-    <div class="table-section">
-        <div class="table-header">
-            <h3 class="header-income">Riwayat Pemasukan</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="th-expense">Tanggal</th>
+                        <th class="th-expense">Kategori</th>
+                        <th class="th-expense">Uraian</th>
+                        <th class="th-expense">Jumlah</th>
+                        <th class="th-expense">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelBodyPengeluaran">
+                    <tr><td colspan="5" class="empty-state">Memuat data dari server...</td></tr>
+                </tbody>
+            </table>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="th-income">Tanggal</th>
-                    <th class="th-income">Kategori</th>
-                    <th class="th-income">Uraian</th>
-                    <th class="th-income">Jumlah</th>
-                    <th class="th-income">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="tabelBodyPemasukan">
-                <tr><td colspan="5" class="empty-state">Memuat data dari server...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- TABEL PENGELUARAN -->
-    <div class="table-section">
-        <div class="table-header">
-            <h3 class="header-expense">Riwayat Pengeluaran</h3>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="th-expense">Tanggal</th>
-                    <th class="th-expense">Kategori</th>
-                    <th class="th-expense">Uraian</th>
-                    <th class="th-expense">Jumlah</th>
-                    <th class="th-expense">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="tabelBodyPengeluaran">
-                <tr><td colspan="5" class="empty-state">Memuat data dari server...</td></tr>
-            </tbody>
-        </table>
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.8
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.9
     </div>
 </div>
 
@@ -302,15 +326,34 @@
         location.reload(); 
     };
 
+    // NAVIGASI HALAMAN (TOMBOL PINDAH)
+    const bukaRiwayat = () => {
+        document.getElementById('halamanUtama').classList.add('hidden');
+        document.getElementById('halamanRiwayat').classList.remove('hidden');
+    };
+
+    const kembaliKeUtama = () => {
+        document.getElementById('halamanRiwayat').classList.add('hidden');
+        document.getElementById('halamanUtama').classList.remove('hidden');
+        
+        // Membersihkan kotak pencarian otomatis agar saldo beranda kembali normal
+        const searchElement = document.getElementById('searchInput');
+        if (searchElement.value !== "") {
+            searchElement.value = "";
+            searchQuery = "";
+            updateUI();
+        }
+    };
+
+
     // SISTEM KEUANGAN
     const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
     let dataKeuangan = [];
 
-    // State untuk Filter
+    // Set Default Bulan ke Hari Ini
     const today = new Date();
     const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
     
-    // Set default value di UI
     document.getElementById('filterBulan').value = currentMonth;
     let filterBulan = currentMonth;
     let filterKategori = "";
@@ -363,12 +406,9 @@
         tbodyMasuk.innerHTML = '';
         tbodyKeluar.innerHTML = '';
         
-        // 1. Urutkan Data Berdasarkan Tanggal Terbaru
         let sortedData = [...dataKeuangan].sort((a, b) => parseDateValue(b.tanggal) - parseDateValue(a.tanggal));
 
-        // 2. Terapkan Filter (Bulan, Kategori, Pencarian)
         let filteredData = sortedData.filter(item => {
-            // Ekstrak Bulan & Tahun dari item (Format YYYY-MM)
             let itemMonth = "";
             const timestamp = parseDateValue(item.tanggal);
             if(timestamp) {
@@ -388,7 +428,6 @@
             return matchBulan && matchKategori && matchSearch;
         });
 
-        // 3. Hitung Total & Cetak ke Tabel Terpisah
         let totalMasuk = 0;
         let totalKeluar = 0;
         let countMasuk = 0;
@@ -414,7 +453,6 @@
                 <td>${actionHtml}</td>
             `;
 
-            // Pisahkan ke Tabel dan Hitung Saldo
             if (item.jenis === 'PEMASUKAN') {
                 if (!isPending) totalMasuk += (Number(item.jumlah) || 0);
                 tbodyMasuk.appendChild(tr);
@@ -426,11 +464,9 @@
             }
         });
 
-        // Tangani State Kosong
         if (countMasuk === 0) tbodyMasuk.innerHTML = `<tr><td colspan="5" class="empty-state">Tidak ada pemasukan di filter ini.</td></tr>`;
         if (countKeluar === 0) tbodyKeluar.innerHTML = `<tr><td colspan="5" class="empty-state">Tidak ada pengeluaran di filter ini.</td></tr>`;
 
-        // Update Dashboard
         const saldo = totalMasuk - totalKeluar;
         document.getElementById('totalPemasukan').innerText = formatRupiah(totalMasuk);
         document.getElementById('totalPengeluaran').innerText = formatRupiah(totalKeluar);
@@ -537,7 +573,6 @@
 
             dataKeuangan.push(transaksiBaru);
             
-            // Jika tanggal transaksi baru bukan di bulan yang sedang difilter, ubah filter ke bulan transaksi tersebut
             const tglBaru = new Date(transaksiBaru.tanggal);
             const bulanBaru = tglBaru.getFullYear() + '-' + String(tglBaru.getMonth() + 1).padStart(2, '0');
             if (filterBulan !== "" && filterBulan !== bulanBaru) {
@@ -547,9 +582,10 @@
 
             updateUI();
             this.reset();
-            
-            // Set kembali tanggal ke hari ini sebagai default (opsional)
             document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            
+            // Pemberitahuan sukses saat berhasil menambah
+            alert("Data berhasil ditambahkan! Anda bisa mengeceknya di menu Riwayat Transaksi.");
 
         } catch (err) {
             alert("Gagal menyimpan data ke server online. Cek koneksi atau URL Apps Script Anda.");
@@ -559,10 +595,8 @@
         }
     });
 
-    // Jalankan pengecekan login saat halaman pertama kali dibuka
+    // Jalankan pengecekan
     cekLogin();
-    
-    // Set default tanggal form transaksi ke hari ini
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 </script>
 

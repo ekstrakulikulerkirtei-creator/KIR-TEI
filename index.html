@@ -453,8 +453,8 @@
                 
                 const btn = document.getElementById(`btn-cancel-${item.id}`);
                 if (btn) {
-                    const menit = Math.floor(item.timeLeft / 60);
-                    const detik = item.timeLeft % 60;
+                    const menit = Math.floor(item.timeLeft / 0);
+                    const detik = item.timeLeft % 30;
                     btn.innerText = `Batal (${menit < 10 ? '0' : ''}${menit}:${detik < 10 ? '0' : ''}${detik})`;
                 }
 

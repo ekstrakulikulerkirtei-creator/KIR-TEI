@@ -14,13 +14,7 @@
             --expense-color: #dc3545;
             --pending-bg: #f8d7da;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
         .container { max-width: 950px; margin: auto; }
         
         /* --- TAMPILAN LOGIN --- */
@@ -97,7 +91,7 @@
 <div id="loginScreen" class="login-container">
     <div class="login-card">
         <h2>KIR TEI</h2>
-        <p>Silakan masukkan 4 angka PIN untuk mengakses data.</p>
+        <p>Silakan masukkan PIN Login untuk mengakses data.</p>
         <form id="formLogin">
             <input type="password" id="inputPassword" placeholder="* * * *" pattern="\d{4}" maxlength="4" inputmode="numeric" required title="Masukkan 4 angka">
             <button type="submit" class="btn-submit" id="btnLogin">Masuk</button>
@@ -111,7 +105,7 @@
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.5</span></p>
+            <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.6</span></p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
@@ -195,7 +189,7 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.5
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.6
     </div>
 </div>
 
@@ -203,10 +197,10 @@
     // ==========================================
     // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxGRfFSQJ65HNerxnNH5rmEkd441elYuxyWQQVLJtXqnDvBhzSRxdelPjtAiPvJou-cjg/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwOtH0MSbkyZLIcQaLlnndjvjhOq9AXU-ncUHrnKgOSJCV6OHZ2fyME7aQzFg88gvqt6A/exec"; 
     // ==========================================
 
-    // SISTEM LOGIN (Mengecek ke Google Sheets)
+    // SISTEM LOGIN
     document.getElementById('formLogin').addEventListener('submit', async function(e) {
         e.preventDefault();
         const inputPass = document.getElementById('inputPassword').value;
@@ -346,16 +340,44 @@
         updateUI();
     });
 
-    const konfirmasiHapus = (id) => {
+    const konfirmasiHapus = async (id) => {
         if (!id || id === 'undefined') {
-            alert("Gagal menghapus! Data ini tidak memiliki ID unik karena ditambahkan secara manual dari Google Sheet. Hapus manual dari Sheet Anda.");
+            alert("Gagal menghapus! Data ini ditambahkan secara manual di Sheet. Hapus manual dari Sheet Anda.");
             return;
         }
 
         const item = dataKeuangan.find(x => String(x.id) === String(id));
         if(!item) return;
 
-        const konfirmasi = confirm("Apakah Anda yakin ingin menghapus data ini?\nPenghapusan akan diproses permanen dalam 30 detik.");
+        // 1. Minta PIN Khusus Hapus
+        const inputPass = prompt("Masukkan PIN Khusus (4 Angka) untuk menghapus data ini:");
+        if (inputPass === null) return; // Jika klik Cancel
+        if (inputPass === "") {
+            alert("PIN Hapus tidak boleh kosong!");
+            return;
+        }
+
+        // 2. Verifikasi PIN Hapus ke Server
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'verify_delete', password: inputPass })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status !== "success") {
+                alert("PIN Hapus SALAH! Penghapusan dibatalkan.");
+                return;
+            }
+        } catch (error) {
+            alert("Gagal memverifikasi PIN Hapus ke server.");
+            return;
+        }
+
+        // 3. Jika PIN Hapus Benar, Jalankan Konfirmasi dan Timer
+        const konfirmasi = confirm("PIN Hapus Benar!\nApakah Anda yakin ingin menghapus data ini? Penghapusan akan diproses permanen dalam 30 detik.");
         
         if (konfirmasi) {
             item.pendingDelete = true;

@@ -46,6 +46,8 @@
             vertical-align: middle;
             margin-left: 5px;
         }
+        
+        /* Dashboard Cards */
         .dashboard {
             display: flex;
             justify-content: space-between;
@@ -73,6 +75,8 @@
         .text-income { color: var(--income-color); }
         .text-expense { color: var(--expense-color); }
         .text-balance { color: var(--primary-color); }
+
+        /* Form Section */
         .form-section {
             background-color: var(--card-bg);
             padding: 20px;
@@ -98,19 +102,23 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+            box-sizing: border-box;
         }
         button.btn-submit {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 16px;
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
             transition: 0.3s;
+            font-weight: bold;
         }
         button.btn-submit:hover { background-color: #004494; }
+
+        /* Table Section */
         .table-section {
             background-color: var(--card-bg);
             padding: 20px;
@@ -133,6 +141,7 @@
             border-radius: 4px;
             width: 300px;
             max-width: 100%;
+            box-sizing: border-box;
         }
         table {
             width: 100%;
@@ -146,6 +155,7 @@
         th {
             background-color: var(--primary-color);
             color: white;
+            white-space: nowrap;
         }
         .badge {
             padding: 5px 10px;
@@ -153,9 +163,11 @@
             font-size: 12px;
             color: white;
             font-weight: bold;
+            display: inline-block;
         }
         .badge-income { background-color: var(--income-color); }
         .badge-expense { background-color: var(--expense-color); }
+        
         .btn-delete {
             background-color: var(--expense-color);
             color: white;
@@ -167,6 +179,7 @@
             transition: 0.3s;
         }
         .btn-delete:hover { background-color: #bd2130; }
+        
         .row-pending {
             background-color: var(--pending-bg);
             opacity: 0.8;
@@ -185,6 +198,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: 0.3s;
+            white-space: nowrap;
         }
         .btn-cancel:hover { background-color: #e0a800; }
         .empty-state {
@@ -199,13 +213,46 @@
             font-size: 13px;
             color: #999;
         }
+
+        /* --- TAMPILAN RESPONSIVE UNTUK MODE HP --- */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .dashboard {
+                flex-direction: column;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .card {
+                padding: 15px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                width: 100%;
+                margin-top: 10px;
+            }
+            th, td {
+                white-space: nowrap; /* Mencegah kolom berantakan di HP */
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Pencatatan Keuangan</h1>
-    <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.2 Online</span></p>
+    <p class="subtitle">Sistem Informasi Wirausaha KIR TEI <span class="version-badge">v1.3 Online</span></p>
 
     <!-- Dashboard Saldo -->
     <div class="dashboard">
@@ -289,13 +336,13 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.2
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan Versi 1.3
     </div>
 </div>
 
 <script>
     // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
-    const API_URL = "https://script.google.com/macros/s/AKfycbwRbOlhaDNpfFhAJXn27NeOltWxs_P-OriHtUlbg27eYLDSwkQJkEaRSzJwcUE8hHnISQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwRbOlhaDNpfFhAJXn27NeOltWxs_P-OriHtUlbg27eYLDSwkQJkEaRSzJwcUE8hHnISQ/exec"; 
 
     const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
     let dataKeuangan = [];
@@ -313,6 +360,7 @@
             updateUI();
         } catch (err) {
             console.error("Gagal mengambil data:", err);
+            document.getElementById('tabelBody').innerHTML = `<tr><td colspan="6" class="empty-state" style="color:red;">Gagal memuat data dari server. Pastikan URL benar.</td></tr>`;
         }
     };
 
@@ -325,7 +373,7 @@
 
         dataKeuangan.forEach((item) => {
             if (!item.pendingDelete) {
-                const jumlah = Number(item.jumlah);
+                const jumlah = Number(item.jumlah) || 0;
                 if (item.jenis === 'PEMASUKAN') totalMasuk += jumlah;
                 else totalKeluar += jumlah;
             }
@@ -335,11 +383,11 @@
 
         let displayData = sortedData.filter(item => {
             const query = searchQuery.toLowerCase();
-            return item.tanggal.toString().toLowerCase().includes(query) ||
-                   item.transaksi.toLowerCase().includes(query) ||
+            return (item.tanggal && item.tanggal.toString().toLowerCase().includes(query)) ||
+                   (item.transaksi && item.transaksi.toLowerCase().includes(query)) ||
                    (item.uraian && item.uraian.toLowerCase().includes(query)) ||
-                   item.jenis.toLowerCase().includes(query) ||
-                   item.jumlah.toString().includes(query);
+                   (item.jenis && item.jenis.toLowerCase().includes(query)) ||
+                   (item.jumlah && item.jumlah.toString().includes(query));
         });
 
         if (displayData.length === 0) {
@@ -384,7 +432,13 @@
     });
 
     const konfirmasiHapus = (id) => {
-        const item = dataKeuangan.find(x => x.id === id);
+        // Cek apakah ID kosong (Jika pengguna ketik manual di spreadsheet, ID akan undefined)
+        if (!id || id === 'undefined') {
+            alert("Gagal menghapus! Data ini tidak memiliki ID unik karena ditambahkan secara manual dari Google Sheet. Hapus manual dari Sheet Anda.");
+            return;
+        }
+
+        const item = dataKeuangan.find(x => String(x.id) === String(id));
         if(!item) return;
 
         const konfirmasi = confirm("Apakah Anda yakin ingin menghapus data ini?\nPenghapusan akan diproses permanen dalam 2 menit.");
@@ -407,13 +461,21 @@
                 if (item.timeLeft <= 0) {
                     clearInterval(item.intervalId);
                     
-                    // Hapus data dari Google Sheet via API
-                    await fetch(API_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'delete', id: id })
-                    });
+                    try {
+                        // Header text/plain ditambahkan agar tidak di-block oleh CORS
+                        await fetch(API_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain;charset=utf-8',
+                            },
+                            body: JSON.stringify({ action: 'delete', id: String(id) })
+                        });
+                    } catch (error) {
+                        console.error("Gagal menghapus di server:", error);
+                    }
 
-                    dataKeuangan = dataKeuangan.filter(x => x.id !== id);
+                    // Hapus dari tampilan
+                    dataKeuangan = dataKeuangan.filter(x => String(x.id) !== String(id));
                     updateUI();
                 }
             }, 1000); 
@@ -421,7 +483,7 @@
     };
 
     const batalHapus = (id) => {
-        const item = dataKeuangan.find(x => x.id === id);
+        const item = dataKeuangan.find(x => String(x.id) === String(id));
         if(!item) return;
 
         clearInterval(item.intervalId);
@@ -450,6 +512,9 @@
         try {
             await fetch(API_URL, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
                 body: JSON.stringify(transaksiBaru)
             });
 
@@ -457,7 +522,7 @@
             updateUI();
             this.reset();
         } catch (err) {
-            alert("Gagal menyimpan data ke server online.");
+            alert("Gagal menyimpan data ke server online. Cek koneksi atau URL Apps Script Anda.");
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.innerText = "Simpan Transaksi";

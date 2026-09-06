@@ -6,7 +6,8 @@
     <title>Keuangan Wirausaha KIR TEI (Online)</title>
     <style>
         :root {
-            --primary-color: #0d6efd; 
+            /* Dikembalikan ke warna biru awal aplikasi Anda */
+            --primary-color: #0056b3; 
             --teal-color: #17a2b8;
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
@@ -30,7 +31,7 @@
         }
         
         /* Overlay transparan khusus untuk popup hapus */
-        .overlay-glass { background-color: rgba(224, 229, 236, 0.85); z-index: 2000; }
+        .overlay-glass { background-color: rgba(224, 229, 236, 0.9); z-index: 2000; }
 
         .login-card { 
             background-color: #e0e5ec; 
@@ -53,7 +54,7 @@
         }
         .pin-box:focus { box-shadow: inset 8px 8px 12px 0 rgba(163,177,198, 0.8), inset -8px -8px 12px 0 rgba(255,255,255, 0.9); }
 
-        /* Tombol Verify Biru yang sebelumnya */
+        /* Tombol Verify Biru */
         .btn-login-neu { 
             background-color: var(--primary-color); 
             color: white; 
@@ -171,7 +172,7 @@
     </div>
 </div>
 
-<!-- MODAL HAPUS OTP UI (DISEMBUNYIKAN AWALNYA) -->
+<!-- MODAL HAPUS OTP UI -->
 <div id="deleteScreen" class="login-container overlay-glass hidden">
     <div class="login-card">
         <h2>Verify Hapus</h2>
@@ -197,7 +198,7 @@
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha <span class="version-badge">v1.16</span> | Halo, Tim</p>
+            <p class="subtitle">Sistem Informasi Wirausaha <span class="version-badge">v1.17</span> | Halo, Tim</p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
@@ -349,7 +350,7 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan v1.16
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan v1.17
     </div>
 </div>
 
@@ -520,7 +521,10 @@
 
             let actionHtml = '';
             if (isPending) {
-                actionHtml = `<button id="btn-cancel-${item.id}" class="btn-cancel" onclick="batalHapus('${item.id}')">Batal</button>`;
+                // Pastikan teks timer muncul saat update UI (contoh: 30s)
+                const menit = Math.floor(item.timeLeft / 60);
+                const detik = item.timeLeft % 60;
+                actionHtml = `<button id="btn-cancel-${item.id}" class="btn-cancel" onclick="batalHapus('${item.id}')">Batal (${menit < 10 ? '0' : ''}${menit}:${detik < 10 ? '0' : ''}${detik})</button>`;
             } else {
                 actionHtml = `<button class="btn-delete" onclick="konfirmasiHapus('${item.id}')">Hapus</button>`;
             }
@@ -574,7 +578,7 @@
     // ================== SISTEM MODAL HAPUS ==================
     const konfirmasiHapus = (id) => {
         if (!id || id === 'undefined') { alert("Gagal menghapus! Data ini ditambahkan manual dari Sheet."); return; }
-        itemHapusAktif = id; // simpan ID yang akan dihapus
+        itemHapusAktif = id; // Simpan ID yang akan dihapus dengan aman
         
         // Munculkan Layar PIN Hapus
         document.getElementById('deleteScreen').classList.remove('hidden');
@@ -587,7 +591,6 @@
 
     const tutupModalHapus = () => {
         document.getElementById('deleteScreen').classList.add('hidden');
-        itemHapusAktif = null;
     };
 
     document.getElementById('formDelete').addEventListener('submit', async function(e) {
@@ -614,8 +617,18 @@
             const result = await response.json();
             
             if (result.status === "success") {
+                // PIN Benar: Ambil ID yang tadi disimpan, lalu tutup modal
+                const idYangAkanDihapus = itemHapusAktif;
                 tutupModalHapus();
-                jalankanTimerHapus(itemHapusAktif); // PIN benar, mulai hitung mundur
+                
+                // Tambahkan pop-up konfirmasi standar untuk menghindari salah pencet (Bug Fix)
+                setTimeout(() => {
+                    const konfirmasi = confirm("PIN Hapus Benar!\nApakah Anda yakin ingin menghapus data ini? (Proses penghapusan permanen dalam 30 detik).");
+                    if (konfirmasi) {
+                        jalankanTimerHapus(idYangAkanDihapus); // Mulai hitung mundur 30 detik
+                    }
+                }, 150);
+
             } else {
                 pesanErrorHapus.style.display = 'block';
                 pesanErrorHapus.innerText = "PIN Hapus Salah!";
@@ -635,12 +648,16 @@
 
         item.pendingDelete = true;
         item.timeLeft = 30; 
-        updateUI(); 
+        updateUI(); // UI akan berubah menjadi tombol batal kuning
 
         item.intervalId = setInterval(async () => {
             item.timeLeft--;
             const btn = document.getElementById(`btn-cancel-${item.id}`);
-            if (btn) btn.innerText = `Batal (${item.timeLeft}s)`;
+            if (btn) {
+                const menit = Math.floor(item.timeLeft / 60);
+                const detik = item.timeLeft % 60;
+                btn.innerText = `Batal (${menit < 10 ? '0' : ''}${menit}:${detik < 10 ? '0' : ''}${detik})`;
+            }
 
             if (item.timeLeft <= 0) {
                 clearInterval(item.intervalId);

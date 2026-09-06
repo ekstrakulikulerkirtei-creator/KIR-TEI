@@ -19,56 +19,87 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; }
         .container { max-width: 800px; margin: auto; }
         
-        /* --- TAMPILAN LOGIN --- */
-        .login-container { display: flex; justify-content: center; align-items: center; height: 90vh; }
-        .login-card { background-color: var(--card-bg); padding: 40px 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        .login-card h2 { color: var(--primary-color); margin: 0 0 5px 0; }
-        .login-card p { color: #666; margin-bottom: 25px; font-size: 14px; }
-        .login-card input { width: 100%; margin-bottom: 15px; padding: 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; text-align: center; letter-spacing: 5px; }
+        /* ========================================================= */
+        /* --- TAMPILAN LOGIN (NEUMORPHISM / ELECTRIC EMBOSSED) --- */
+        /* ========================================================= */
+        .login-container { 
+            display: flex; justify-content: center; align-items: center; 
+            /* Menggunakan fixed agar menutupi seluruh layar dengan rapi */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: #e0e5ec; /* Warna abu-abu soft khas Neumorphism */
+            z-index: 1000;
+        }
+        .login-card { 
+            background-color: #e0e5ec; 
+            padding: 40px 30px; 
+            border-radius: 20px; 
+            /* Efek Menonjol Keluar (Outset Shadow) */
+            box-shadow: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
+            width: 100%; 
+            max-width: 330px; 
+            text-align: center; 
+        }
+        .login-card h2 { color: #31344b; margin: 0 0 5px 0; font-size: 24px; font-weight: bold;}
+        .login-card p { color: #6b7c93; margin-bottom: 30px; font-size: 13px; }
+        
+        .otp-inputs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            margin-bottom: 30px; 
+        }
+        .pin-box { 
+            width: 50px; 
+            height: 55px; 
+            font-size: 24px; 
+            text-align: center; 
+            border: none; 
+            border-radius: 12px; 
+            background-color: #e0e5ec; 
+            color: #31344b;
+            font-weight: bold;
+            /* Efek Cekung ke Dalam (Inset Shadow) */
+            box-shadow: inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8);
+            outline: none;
+            transition: 0.2s;
+        }
+        .pin-box:focus {
+            box-shadow: inset 8px 8px 12px 0 rgba(163,177,198, 0.8), inset -8px -8px 12px 0 rgba(255,255,255, 0.9);
+        }
+
+        .btn-login-neu { 
+            background-color: #e0e5ec; 
+            color: #31344b; 
+            border: none; 
+            padding: 15px 20px; 
+            font-size: 15px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-weight: bold; 
+            box-shadow: 6px 6px 12px rgba(163,177,198,0.6), -6px -6px 12px rgba(255,255,255, 0.5);
+            transition: 0.2s;
+        }
+        .btn-login-neu:active {
+            box-shadow: inset 4px 4px 8px rgba(163,177,198,0.6), inset -4px -4px 8px rgba(255,255,255, 0.5);
+        }
         .hidden { display: none !important; }
 
-        /* --- HEADER --- */
+        /* ========================================================= */
+        /* --- HEADER & APLIKASI UTAMA (TIDAK BERUBAH) --- */
+        /* ========================================================= */
         .header-app { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .header-title h1 { color: var(--primary-color); margin: 0 0 2px 0; font-size: 20px; }
         .header-title p.subtitle { color: #666; margin: 0; font-size: 12px; }
         .version-badge { background-color: var(--primary-color); color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold; }
         .btn-logout { background-color: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-        /* --- TABEL GRAND TOTAL (DIUBAH AGAR BISA DIGESER KIRI-KANAN) --- */
-        .grand-total-section { 
-            background-color: white; 
-            border-radius: 8px; 
-            margin-bottom: 15px; 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            /* Fitur Scroll/Geser */
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-        }
-        .grand-total-section table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            text-align: center; 
-            /* Memaksa tabel memiliki lebar minimum agar tidak menyempit dan memicu scroll */
-            min-width: 500px; 
-        }
-        .grand-total-section th { 
-            background-color: var(--primary-color); 
-            color: white; 
-            padding: 10px 8px; 
-            font-size: 12px; 
-            font-weight: 600; 
-            border-right: 1px solid rgba(255,255,255,0.2); 
-            white-space: nowrap; /* Teks tidak akan turun ke bawah */
-        }
+        /* --- TABEL GRAND TOTAL (BISA DIGESER) --- */
+        .grand-total-section { background-color: white; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .grand-total-section table { width: 100%; border-collapse: collapse; text-align: center; min-width: 500px; }
+        .grand-total-section th { background-color: var(--primary-color); color: white; padding: 10px 8px; font-size: 12px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.2); white-space: nowrap; }
         .grand-total-section th:last-child { border-right: none; }
-        .grand-total-section td { 
-            padding: 15px 8px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-right: 1px solid var(--border-color); 
-            white-space: nowrap; 
-        }
+        .grand-total-section td { padding: 15px 8px; font-size: 16px; font-weight: bold; border-right: 1px solid var(--border-color); white-space: nowrap; }
         .grand-total-section td:last-child { border-right: none; color: var(--primary-color); }
 
         /* --- FILTER BERSAMA --- */
@@ -100,38 +131,30 @@
         .form-group { display: flex; flex-direction: column; }
         .form-group label { margin-bottom: 4px; font-weight: bold; font-size: 11px; color: #333; }
         .form-group input, .form-group select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
-        
         button.btn-submit { background-color: var(--primary-color); color: white; border: none; padding: 10px 15px; font-size: 14px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
 
         /* --- RIWAYAT TABEL --- */
         .history-header { margin-bottom: 12px; }
         .search-box { padding: 10px; border: 1px solid #ccc; border-radius: 6px; width: 100%; font-size: 13px; box-sizing: border-box; }
-        
         .table-section { background-color: white; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border-color); }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 12px; }
         th { background-color: var(--primary-color); color: white; white-space: nowrap; font-weight: 600; }
         .th-income { background-color: var(--income-color); }
         .th-expense { background-color: var(--expense-color); }
-        
         .btn-delete { background-color: var(--expense-color); color: white; border: none; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; }
         .row-pending { background-color: var(--pending-bg); opacity: 0.8; }
         .row-pending td:not(:last-child) { text-decoration: line-through; color: #666; }
         .btn-cancel { background-color: #ffc107; color: #333; border: none; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; }
         .empty-state { text-align: center; color: #888; font-style: italic; padding: 15px !important; }
-
         .footer { text-align: center; margin-top: 20px; font-size: 11px; color: #aaa; }
 
-        /* --- MEDIA QUERY KHUSUS AGAR GRID TIDAK HANCUR DI HP --- */
         @media screen and (max-width: 480px) {
             body { padding: 10px; }
             .header-title h1 { font-size: 18px; }
             .header-title p.subtitle { font-size: 10px; }
-            
-            /* Hapus paksaan font kecil, biarkan scroll beraksi */
             .grand-total-section th { font-size: 11px; padding: 10px; }
             .grand-total-section td { font-size: 15px; padding: 12px; }
-            
             .filter-section label { font-size: 10px; }
             .filter-section input, .filter-section select { font-size: 12px; padding: 6px; }
             .tab-btn { font-size: 11px; padding: 10px 2px; }
@@ -145,16 +168,21 @@
 </head>
 <body>
 
-<!-- HALAMAN LOGIN -->
+<!-- HALAMAN LOGIN (EMBOSSED OTP UI) -->
 <div id="loginScreen" class="login-container">
     <div class="login-card">
-        <h2>KIR TEI</h2>
-        <p>Silakan masukkan 4 angka PIN.</p>
+        <h2>Verify PIN</h2>
+        <p>Enter the 4-digit security code</p>
         <form id="formLogin">
-            <input type="password" id="inputPassword" placeholder="* * * *" pattern="\d{4}" maxlength="4" inputmode="numeric" required>
-            <button type="submit" class="btn-submit" id="btnLogin">Masuk</button>
+            <div class="otp-inputs">
+                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
+            </div>
+            <button type="submit" class="btn-login-neu" id="btnLogin">Verify Now</button>
         </form>
-        <p id="pesanError" style="color: red; display: none; margin-top: 15px; font-weight: bold;">PIN salah!</p>
+        <p id="pesanError" style="color: #dc3545; display: none; margin-top: 15px; font-size: 14px; font-weight: bold;">PIN salah!</p>
     </div>
 </div>
 
@@ -165,12 +193,12 @@
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha <span class="version-badge">v1.14</span> | Halo, Tim</p>
+            <p class="subtitle">Sistem Informasi Wirausaha <span class="version-badge">v1.15</span> | Halo, Tim</p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
 
-    <!-- GRAND TOTAL TABLE (SEKARANG BISA DIGESER) -->
+    <!-- GRAND TOTAL TABLE (BISA DIGESER) -->
     <div class="grand-total-section">
         <table>
             <thead>
@@ -216,13 +244,10 @@
         <button id="tabRiwayat" class="tab-btn" onclick="bukaTab('riwayat')">🧾 Riwayat Transaksi</button>
     </div>
 
-    <!-- ========================================== -->
     <!-- BAGIAN 1: TAB LAPORAN BULANAN (DASHBOARD & FORM)-->
-    <!-- ========================================== -->
     <div id="halamanUtama">
         <h3 class="laporan-title">Laporan Bulan Terpilih:</h3>
         
-        <!-- DASHBOARD 3 KOTAK -->
         <div class="dashboard">
             <div class="card">
                 <h3>Total Pemasukan (Filter)</h3>
@@ -238,7 +263,6 @@
             </div>
         </div>
 
-        <!-- FORM TRANSAKSI -->
         <div class="form-section">
             <h3>Tambah Transaksi Baru</h3>
             <form id="formTransaksi">
@@ -284,9 +308,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
     <!-- BAGIAN 2: TAB RIWAYAT TRANSAKSI -->
-    <!-- ========================================== -->
     <div id="halamanRiwayat" class="hidden">
         
         <div class="history-header">
@@ -331,7 +353,7 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan v1.14
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan v1.15
     </div>
 </div>
 
@@ -342,15 +364,43 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwOtH0MSbkyZLIcQaLlnndjvjhOq9AXU-ncUHrnKgOSJCV6OHZ2fyME7aQzFg88gvqt6A/exec"; 
     // ==========================================
 
-    // SISTEM LOGIN (Cek PIN 4 Angka ke Google Sheets)
+    // LOGIKA AUTO-FOKUS KOTAK PIN (Script Baru)
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    pinBoxes.forEach((box, index) => {
+        // Pindah otomatis jika sudah mengetik 1 angka
+        box.addEventListener('input', () => {
+            box.value = box.value.replace(/[^0-9]/g, ''); // Pastikan hanya menerima angka
+            if (box.value !== '' && index < pinBoxes.length - 1) {
+                pinBoxes[index + 1].focus();
+            }
+        });
+        
+        // Mundur otomatis jika menekan backspace
+        box.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && box.value === '' && index > 0) {
+                pinBoxes[index - 1].focus();
+            }
+        });
+    });
+
+    // SISTEM LOGIN (Membaca 4 kotak PIN)
     document.getElementById('formLogin').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const inputPass = document.getElementById('inputPassword').value;
+        
+        // Menggabungkan isi ke-4 kotak menjadi satu teks
+        let inputPass = "";
+        pinBoxes.forEach(box => inputPass += box.value);
+
+        if(inputPass.length < 4) {
+            alert("Harap masukkan 4 angka PIN secara lengkap.");
+            return;
+        }
+
         const pesanError = document.getElementById('pesanError');
         const btnLogin = document.getElementById('btnLogin');
 
         btnLogin.disabled = true;
-        btnLogin.innerText = "Memeriksa...";
+        btnLogin.innerText = "Verifying...";
         pesanError.style.display = 'none';
 
         try {
@@ -366,14 +416,14 @@
                 tampilkanAplikasi();
             } else {
                 pesanError.style.display = 'block';
-                pesanError.innerText = "PIN salah!";
+                pesanError.innerText = "PIN Salah!";
             }
         } catch (error) {
             pesanError.style.display = 'block';
             pesanError.innerText = "Gagal terhubung ke server.";
         } finally {
             btnLogin.disabled = false;
-            btnLogin.innerText = "Masuk";
+            btnLogin.innerText = "Verify Now";
         }
     });
 

@@ -20,20 +20,22 @@
         .container { max-width: 800px; margin: auto; }
         
         /* ========================================================= */
-        /* --- TAMPILAN LOGIN (NEUMORPHISM / ELECTRIC EMBOSSED) --- */
+        /* --- TAMPILAN NEUMORPHISM (LOGIN & HAPUS OTP UI) --- */
         /* ========================================================= */
         .login-container { 
             display: flex; justify-content: center; align-items: center; 
-            /* Menggunakan fixed agar menutupi seluruh layar dengan rapi */
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background-color: #e0e5ec; /* Warna abu-abu soft khas Neumorphism */
             z-index: 1000;
         }
+        
+        /* Overlay transparan khusus untuk popup hapus */
+        .overlay-glass { background-color: rgba(224, 229, 236, 0.85); z-index: 2000; }
+
         .login-card { 
             background-color: #e0e5ec; 
             padding: 40px 30px; 
             border-radius: 20px; 
-            /* Efek Menonjol Keluar (Outset Shadow) */
             box-shadow: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
             width: 100%; 
             max-width: 330px; 
@@ -42,51 +44,34 @@
         .login-card h2 { color: #31344b; margin: 0 0 5px 0; font-size: 24px; font-weight: bold;}
         .login-card p { color: #6b7c93; margin-bottom: 30px; font-size: 13px; }
         
-        .otp-inputs { 
-            display: flex; 
-            justify-content: center; 
-            gap: 12px; 
-            margin-bottom: 30px; 
-        }
+        .otp-inputs { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
         .pin-box { 
-            width: 50px; 
-            height: 55px; 
-            font-size: 24px; 
-            text-align: center; 
-            border: none; 
-            border-radius: 12px; 
-            background-color: #e0e5ec; 
-            color: #31344b;
-            font-weight: bold;
-            /* Efek Cekung ke Dalam (Inset Shadow) */
+            width: 50px; height: 55px; font-size: 24px; text-align: center; 
+            border: none; border-radius: 12px; background-color: #e0e5ec; color: #31344b; font-weight: bold;
             box-shadow: inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8);
-            outline: none;
-            transition: 0.2s;
+            outline: none; transition: 0.2s;
         }
-        .pin-box:focus {
-            box-shadow: inset 8px 8px 12px 0 rgba(163,177,198, 0.8), inset -8px -8px 12px 0 rgba(255,255,255, 0.9);
-        }
+        .pin-box:focus { box-shadow: inset 8px 8px 12px 0 rgba(163,177,198, 0.8), inset -8px -8px 12px 0 rgba(255,255,255, 0.9); }
 
+        /* Tombol Verify Biru yang sebelumnya */
         .btn-login-neu { 
-            background-color: #e0e5ec; 
-            color: #31344b; 
-            border: none; 
-            padding: 15px 20px; 
-            font-size: 15px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-weight: bold; 
+            background-color: var(--primary-color); 
+            color: white; 
+            border: none; padding: 15px 20px; font-size: 15px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; 
             box-shadow: 6px 6px 12px rgba(163,177,198,0.6), -6px -6px 12px rgba(255,255,255, 0.5);
             transition: 0.2s;
         }
-        .btn-login-neu:active {
-            box-shadow: inset 4px 4px 8px rgba(163,177,198,0.6), inset -4px -4px 8px rgba(255,255,255, 0.5);
+        .btn-login-neu:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.3), inset -4px -4px 8px rgba(255,255,255, 0.2); }
+        
+        .btn-batal-neu {
+            background-color: #6c757d;
+            margin-top: 15px;
         }
+
         .hidden { display: none !important; }
 
         /* ========================================================= */
-        /* --- HEADER & APLIKASI UTAMA (TIDAK BERUBAH) --- */
+        /* --- HEADER & APLIKASI UTAMA --- */
         /* ========================================================= */
         .header-app { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .header-title h1 { color: var(--primary-color); margin: 0 0 2px 0; font-size: 20px; }
@@ -94,7 +79,7 @@
         .version-badge { background-color: var(--primary-color); color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold; }
         .btn-logout { background-color: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-        /* --- TABEL GRAND TOTAL (BISA DIGESER) --- */
+        /* --- TABEL GRAND TOTAL --- */
         .grand-total-section { background-color: white; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .grand-total-section table { width: 100%; border-collapse: collapse; text-align: center; min-width: 500px; }
         .grand-total-section th { background-color: var(--primary-color); color: white; padding: 10px 8px; font-size: 12px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.2); white-space: nowrap; }
@@ -168,21 +153,40 @@
 </head>
 <body>
 
-<!-- HALAMAN LOGIN (EMBOSSED OTP UI) -->
+<!-- HALAMAN LOGIN -->
 <div id="loginScreen" class="login-container">
     <div class="login-card">
         <h2>Verify PIN</h2>
         <p>Enter the 4-digit security code</p>
         <form id="formLogin">
             <div class="otp-inputs">
-                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
-                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
-                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
-                <input type="password" class="pin-box" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box log-pin" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box log-pin" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box log-pin" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box log-pin" maxlength="1" required inputmode="numeric">
             </div>
             <button type="submit" class="btn-login-neu" id="btnLogin">Verify Now</button>
         </form>
         <p id="pesanError" style="color: #dc3545; display: none; margin-top: 15px; font-size: 14px; font-weight: bold;">PIN salah!</p>
+    </div>
+</div>
+
+<!-- MODAL HAPUS OTP UI (DISEMBUNYIKAN AWALNYA) -->
+<div id="deleteScreen" class="login-container overlay-glass hidden">
+    <div class="login-card">
+        <h2>Verify Hapus</h2>
+        <p>Masukkan 4-digit PIN khusus hapus</p>
+        <form id="formDelete">
+            <div class="otp-inputs">
+                <input type="password" class="pin-box del-pin" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box del-pin" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box del-pin" maxlength="1" required inputmode="numeric">
+                <input type="password" class="pin-box del-pin" maxlength="1" required inputmode="numeric">
+            </div>
+            <button type="submit" class="btn-login-neu" id="btnVerifyHapus">Verify & Hapus</button>
+            <button type="button" class="btn-login-neu btn-batal-neu" onclick="tutupModalHapus()">Batal</button>
+        </form>
+        <p id="pesanErrorHapus" style="color: #dc3545; display: none; margin-top: 15px; font-size: 14px; font-weight: bold;">PIN Hapus salah!</p>
     </div>
 </div>
 
@@ -193,12 +197,12 @@
     <div class="header-app">
         <div class="header-title">
             <h1>Pencatatan Keuangan</h1>
-            <p class="subtitle">Sistem Informasi Wirausaha <span class="version-badge">v1.15</span> | Halo, Tim</p>
+            <p class="subtitle">Sistem Informasi Wirausaha <span class="version-badge">v1.16</span> | Halo, Tim</p>
         </div>
         <button onclick="logout()" class="btn-logout">Keluar (Logout)</button>
     </div>
 
-    <!-- GRAND TOTAL TABLE (BISA DIGESER) -->
+    <!-- GRAND TOTAL TABLE -->
     <div class="grand-total-section">
         <table>
             <thead>
@@ -244,10 +248,8 @@
         <button id="tabRiwayat" class="tab-btn" onclick="bukaTab('riwayat')">🧾 Riwayat Transaksi</button>
     </div>
 
-    <!-- BAGIAN 1: TAB LAPORAN BULANAN (DASHBOARD & FORM)-->
     <div id="halamanUtama">
         <h3 class="laporan-title">Laporan Bulan Terpilih:</h3>
-        
         <div class="dashboard">
             <div class="card">
                 <h3>Total Pemasukan (Filter)</h3>
@@ -266,7 +268,6 @@
         <div class="form-section">
             <h3>Tambah Transaksi Baru</h3>
             <form id="formTransaksi">
-                
                 <div class="form-grid-3">
                     <div class="form-group">
                         <label>Tanggal</label>
@@ -291,7 +292,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-grid-2">
                     <div class="form-group">
                         <label>Jumlah/Harga (Rp)</label>
@@ -302,19 +302,15 @@
                         <input type="text" id="uraian" placeholder="Penjelasan transaksi">
                     </div>
                 </div>
-
                 <button type="submit" class="btn-submit" id="btnSubmit">Simpan Transaksi</button>
             </form>
         </div>
     </div>
 
-    <!-- BAGIAN 2: TAB RIWAYAT TRANSAKSI -->
     <div id="halamanRiwayat" class="hidden">
-        
         <div class="history-header">
             <input type="text" id="searchInput" class="search-box" placeholder="Cari Uraian/Nominal di riwayat...">
         </div>
-
         <h3 class="laporan-title" style="margin-top:15px; color:var(--income-color);">Riwayat Pemasukan</h3>
         <div class="table-section" style="margin-bottom: 20px;">
             <table>
@@ -353,7 +349,7 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan v1.15
+        &copy; 2026 Wirausaha KIR TEI - Pencatatan Keuangan v1.16
     </div>
 </div>
 
@@ -364,37 +360,35 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwOtH0MSbkyZLIcQaLlnndjvjhOq9AXU-ncUHrnKgOSJCV6OHZ2fyME7aQzFg88gvqt6A/exec"; 
     // ==========================================
 
-    // LOGIKA AUTO-FOKUS KOTAK PIN (Script Baru)
-    const pinBoxes = document.querySelectorAll('.pin-box');
-    pinBoxes.forEach((box, index) => {
-        // Pindah otomatis jika sudah mengetik 1 angka
-        box.addEventListener('input', () => {
-            box.value = box.value.replace(/[^0-9]/g, ''); // Pastikan hanya menerima angka
-            if (box.value !== '' && index < pinBoxes.length - 1) {
-                pinBoxes[index + 1].focus();
-            }
+    // FUNGSI AUTO FOKUS PIN KOTAK
+    const setupPinAutoFocus = (selector) => {
+        const boxes = document.querySelectorAll(selector);
+        boxes.forEach((box, index) => {
+            box.addEventListener('input', () => {
+                box.value = box.value.replace(/[^0-9]/g, '');
+                if (box.value !== '' && index < boxes.length - 1) {
+                    boxes[index + 1].focus();
+                }
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && box.value === '' && index > 0) {
+                    boxes[index - 1].focus();
+                }
+            });
         });
-        
-        // Mundur otomatis jika menekan backspace
-        box.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && box.value === '' && index > 0) {
-                pinBoxes[index - 1].focus();
-            }
-        });
-    });
+    };
 
-    // SISTEM LOGIN (Membaca 4 kotak PIN)
+    setupPinAutoFocus('.log-pin'); // Setup untuk kotak Login
+    setupPinAutoFocus('.del-pin'); // Setup untuk kotak Hapus
+
+    // ================== SISTEM LOGIN ==================
     document.getElementById('formLogin').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Menggabungkan isi ke-4 kotak menjadi satu teks
         let inputPass = "";
-        pinBoxes.forEach(box => inputPass += box.value);
+        document.querySelectorAll('.log-pin').forEach(box => inputPass += box.value);
 
-        if(inputPass.length < 4) {
-            alert("Harap masukkan 4 angka PIN secara lengkap.");
-            return;
-        }
+        if(inputPass.length < 4) { alert("Harap masukkan 4 angka PIN secara lengkap."); return; }
 
         const pesanError = document.getElementById('pesanError');
         const btnLogin = document.getElementById('btnLogin');
@@ -427,49 +421,15 @@
         }
     });
 
-    const cekLogin = () => {
-        if (sessionStorage.getItem('isLoggedIn') === 'true') { tampilkanAplikasi(); }
-    };
-
+    const cekLogin = () => { if (sessionStorage.getItem('isLoggedIn') === 'true') { tampilkanAplikasi(); } };
     const tampilkanAplikasi = () => {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appContent').classList.remove('hidden');
         muatDataOnline(); 
     };
+    const logout = () => { sessionStorage.removeItem('isLoggedIn'); location.reload(); };
 
-    const logout = () => {
-        sessionStorage.removeItem('isLoggedIn');
-        location.reload(); 
-    };
-
-    // NAVIGASI TAB KIRI/KANAN
-    const bukaTab = (tabName) => {
-        const btnBulanan = document.getElementById('tabBulanan');
-        const btnRiwayat = document.getElementById('tabRiwayat');
-        const halUtama = document.getElementById('halamanUtama');
-        const halRiwayat = document.getElementById('halamanRiwayat');
-
-        if (tabName === 'bulanan') {
-            btnBulanan.classList.add('active');
-            btnRiwayat.classList.remove('active');
-            halUtama.classList.remove('hidden');
-            halRiwayat.classList.add('hidden');
-            
-            const searchElement = document.getElementById('searchInput');
-            if (searchElement.value !== "") {
-                searchElement.value = "";
-                searchQuery = "";
-                updateUI();
-            }
-        } else {
-            btnRiwayat.classList.add('active');
-            btnBulanan.classList.remove('active');
-            halRiwayat.classList.remove('hidden');
-            halUtama.classList.add('hidden');
-        }
-    };
-
-    // SISTEM KEUANGAN
+    // ================== SISTEM KEUANGAN ==================
     const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
     let dataKeuangan = [];
 
@@ -480,11 +440,9 @@
     let filterBulan = currentMonth;
     let filterKategori = "";
     let searchQuery = "";
+    let itemHapusAktif = null; // Menyimpan ID data yang mau dihapus
 
-    const formatRupiah = (angka) => {
-        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-    };
-
+    const formatRupiah = (angka) => { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); };
     const parseDateValue = (dateStr) => {
         if (!dateStr) return 0;
         const str = String(dateStr);
@@ -510,15 +468,13 @@
             dataKeuangan = await res.json();
             updateUI();
         } catch (err) {
-            console.error("Gagal memuat data:", err);
             document.getElementById('tabelBodyPemasukan').innerHTML = `<tr><td colspan="5" class="empty-state" style="color:red;">Gagal memuat data. Cek koneksi.</td></tr>`;
             document.getElementById('tabelBodyPengeluaran').innerHTML = `<tr><td colspan="5" class="empty-state" style="color:red;">Gagal memuat data. Cek koneksi.</td></tr>`;
         }
     };
 
     const updateUI = () => {
-        let grandTotalMasuk = 0;
-        let grandTotalKeluar = 0;
+        let grandTotalMasuk = 0; let grandTotalKeluar = 0;
 
         dataKeuangan.forEach((item) => {
             if (!item.pendingDelete) {
@@ -533,8 +489,7 @@
 
         const tbodyMasuk = document.getElementById('tabelBodyPemasukan');
         const tbodyKeluar = document.getElementById('tabelBodyPengeluaran');
-        tbodyMasuk.innerHTML = '';
-        tbodyKeluar.innerHTML = '';
+        tbodyMasuk.innerHTML = ''; tbodyKeluar.innerHTML = '';
         
         let sortedData = [...dataKeuangan].sort((a, b) => parseDateValue(b.tanggal) - parseDateValue(a.tanggal));
 
@@ -550,17 +505,13 @@
             const matchKategori = filterKategori === "" || item.transaksi === filterKategori;
             const query = searchQuery.toLowerCase();
             const tglTampil = formatTanggalTampil(item.tanggal).toLowerCase();
-            const matchSearch = (tglTampil.includes(query)) ||
-                   (item.uraian && item.uraian.toLowerCase().includes(query)) ||
-                   (item.jumlah && item.jumlah.toString().includes(query));
+            const matchSearch = (tglTampil.includes(query)) || (item.uraian && item.uraian.toLowerCase().includes(query)) || (item.jumlah && item.jumlah.toString().includes(query));
 
             return matchBulan && matchKategori && matchSearch;
         });
 
-        let totalMasukBulanIni = 0;
-        let totalKeluarBulanIni = 0;
-        let countMasuk = 0;
-        let countKeluar = 0;
+        let totalMasukBulanIni = 0; let totalKeluarBulanIni = 0;
+        let countMasuk = 0; let countKeluar = 0;
 
         filteredData.forEach((item) => {
             const isPending = item.pendingDelete;
@@ -584,36 +535,75 @@
 
             if (item.jenis === 'PEMASUKAN') {
                 if (!isPending) totalMasukBulanIni += (Number(item.jumlah) || 0);
-                tbodyMasuk.appendChild(tr);
-                countMasuk++;
+                tbodyMasuk.appendChild(tr); countMasuk++;
             } else {
                 if (!isPending) totalKeluarBulanIni += (Number(item.jumlah) || 0);
-                tbodyKeluar.appendChild(tr);
-                countKeluar++;
+                tbodyKeluar.appendChild(tr); countKeluar++;
             }
         });
 
         if (countMasuk === 0) tbodyMasuk.innerHTML = `<tr><td colspan="5" class="empty-state">Data pemasukan kosong.</td></tr>`;
         if (countKeluar === 0) tbodyKeluar.innerHTML = `<tr><td colspan="5" class="empty-state">Data pengeluaran kosong.</td></tr>`;
 
-        const saldoBulanIni = totalMasukBulanIni - totalKeluarBulanIni;
         document.getElementById('totalPemasukan').innerText = formatRupiah(totalMasukBulanIni);
         document.getElementById('totalPengeluaran').innerText = formatRupiah(totalKeluarBulanIni);
-        document.getElementById('saldoAkhir').innerText = formatRupiah(saldoBulanIni);
+        document.getElementById('saldoAkhir').innerText = formatRupiah(totalMasukBulanIni - totalKeluarBulanIni);
+    };
+
+    const bukaTab = (tabName) => {
+        const btnBulanan = document.getElementById('tabBulanan');
+        const btnRiwayat = document.getElementById('tabRiwayat');
+        const halUtama = document.getElementById('halamanUtama');
+        const halRiwayat = document.getElementById('halamanRiwayat');
+
+        if (tabName === 'bulanan') {
+            btnBulanan.classList.add('active'); btnRiwayat.classList.remove('active');
+            halUtama.classList.remove('hidden'); halRiwayat.classList.add('hidden');
+            const searchElement = document.getElementById('searchInput');
+            if (searchElement.value !== "") { searchElement.value = ""; searchQuery = ""; updateUI(); }
+        } else {
+            btnRiwayat.classList.add('active'); btnBulanan.classList.remove('active');
+            halRiwayat.classList.remove('hidden'); halUtama.classList.add('hidden');
+        }
     };
 
     document.getElementById('filterBulan').addEventListener('change', function(e) { filterBulan = e.target.value; updateUI(); });
     document.getElementById('filterKategori').addEventListener('change', function(e) { filterKategori = e.target.value; updateUI(); });
     document.getElementById('searchInput').addEventListener('input', function(e) { searchQuery = e.target.value; updateUI(); });
 
-    const konfirmasiHapus = async (id) => {
+    // ================== SISTEM MODAL HAPUS ==================
+    const konfirmasiHapus = (id) => {
         if (!id || id === 'undefined') { alert("Gagal menghapus! Data ini ditambahkan manual dari Sheet."); return; }
-        const item = dataKeuangan.find(x => String(x.id) === String(id));
-        if(!item) return;
+        itemHapusAktif = id; // simpan ID yang akan dihapus
+        
+        // Munculkan Layar PIN Hapus
+        document.getElementById('deleteScreen').classList.remove('hidden');
+        document.querySelectorAll('.del-pin').forEach(box => box.value = ''); // Kosongkan form
+        document.getElementById('pesanErrorHapus').style.display = 'none';
+        
+        // Auto fokus ke kotak pertama
+        setTimeout(() => document.querySelectorAll('.del-pin')[0].focus(), 100); 
+    };
 
-        const inputPass = prompt("Masukkan PIN Khusus (4 Angka) untuk menghapus data ini:");
-        if (inputPass === null) return; 
-        if (inputPass === "") { alert("PIN Hapus tidak boleh kosong!"); return; }
+    const tutupModalHapus = () => {
+        document.getElementById('deleteScreen').classList.add('hidden');
+        itemHapusAktif = null;
+    };
+
+    document.getElementById('formDelete').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        let inputPass = "";
+        document.querySelectorAll('.del-pin').forEach(box => inputPass += box.value);
+
+        if(inputPass.length < 4) { alert("Harap masukkan 4 angka PIN secara lengkap."); return; }
+
+        const pesanErrorHapus = document.getElementById('pesanErrorHapus');
+        const btnVerify = document.getElementById('btnVerifyHapus');
+
+        btnVerify.disabled = true;
+        btnVerify.innerText = "Verifying...";
+        pesanErrorHapus.style.display = 'none';
 
         try {
             const response = await fetch(API_URL, {
@@ -622,34 +612,49 @@
                 body: JSON.stringify({ action: 'verify_delete', password: inputPass })
             });
             const result = await response.json();
-            if (result.status !== "success") { alert("PIN Hapus SALAH! Penghapusan dibatalkan."); return; }
-        } catch (error) { alert("Gagal memverifikasi PIN Hapus."); return; }
-
-        const konfirmasi = confirm("PIN Hapus Benar!\nApakah Anda yakin ingin menghapus data ini? (Proses 30 detik).");
-        if (konfirmasi) {
-            item.pendingDelete = true;
-            item.timeLeft = 30; 
-            updateUI(); 
-
-            item.intervalId = setInterval(async () => {
-                item.timeLeft--;
-                const btn = document.getElementById(`btn-cancel-${item.id}`);
-                if (btn) btn.innerText = `Batal (${item.timeLeft}s)`;
-
-                if (item.timeLeft <= 0) {
-                    clearInterval(item.intervalId);
-                    try {
-                        await fetch(API_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'delete', id: String(id) })
-                        });
-                    } catch (error) {}
-                    dataKeuangan = dataKeuangan.filter(x => String(x.id) !== String(id));
-                    updateUI();
-                }
-            }, 1000); 
+            
+            if (result.status === "success") {
+                tutupModalHapus();
+                jalankanTimerHapus(itemHapusAktif); // PIN benar, mulai hitung mundur
+            } else {
+                pesanErrorHapus.style.display = 'block';
+                pesanErrorHapus.innerText = "PIN Hapus Salah!";
+            }
+        } catch (error) {
+            pesanErrorHapus.style.display = 'block';
+            pesanErrorHapus.innerText = "Gagal terhubung ke server.";
+        } finally {
+            btnVerify.disabled = false;
+            btnVerify.innerText = "Verify & Hapus";
         }
+    });
+
+    const jalankanTimerHapus = (id) => {
+        const item = dataKeuangan.find(x => String(x.id) === String(id));
+        if(!item) return;
+
+        item.pendingDelete = true;
+        item.timeLeft = 30; 
+        updateUI(); 
+
+        item.intervalId = setInterval(async () => {
+            item.timeLeft--;
+            const btn = document.getElementById(`btn-cancel-${item.id}`);
+            if (btn) btn.innerText = `Batal (${item.timeLeft}s)`;
+
+            if (item.timeLeft <= 0) {
+                clearInterval(item.intervalId);
+                try {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'delete', id: String(id) })
+                    });
+                } catch (error) {}
+                dataKeuangan = dataKeuangan.filter(x => String(x.id) !== String(id));
+                updateUI();
+            }
+        }, 1000); 
     };
 
     const batalHapus = (id) => {
@@ -687,10 +692,7 @@
             
             const tglBaru = new Date(transaksiBaru.tanggal);
             const bulanBaru = tglBaru.getFullYear() + '-' + String(tglBaru.getMonth() + 1).padStart(2, '0');
-            if (filterBulan !== "" && filterBulan !== bulanBaru) {
-                filterBulan = bulanBaru;
-                document.getElementById('filterBulan').value = bulanBaru;
-            }
+            if (filterBulan !== "" && filterBulan !== bulanBaru) { filterBulan = bulanBaru; document.getElementById('filterBulan').value = bulanBaru; }
 
             updateUI();
             this.reset();

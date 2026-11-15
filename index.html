@@ -273,6 +273,14 @@ const formatTanggal = (s) => {
   const str = String(s), p = str.split('-');
   return (p.length === 3 && p[0].length === 4) ? `${p[2]}-${p[1]}-${p[0]}` : str;
 };
+const jamSekarang = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+const formatJam = (j) => {
+  if (!j) return '';
+  const s = String(j);
+  if (s.includes('T')) { const d = new Date(s); return isNaN(d) ? '' : String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
+  const m = s.match(/^(\d{1,2})[:.](\d{2})/);
+  return m ? m[1].padStart(2,'0') + ':' + m[2] : '';
+};
 const labelKategori = (k) => k === 'Dan Lain-Lain' ? 'Lain-lain' : k;
 
 const muatDataOnline = async () => {
@@ -305,7 +313,7 @@ const updateUI = () => {
   };
   const diBulan = dataKeuangan
     .filter(i => filterBulan === '' || bulanItem(i) === filterBulan)
-    .sort((a, b) => parseDateValue(b.tanggal) - parseDateValue(a.tanggal));
+    .sort((a, b) => (parseDateValue(b.tanggal) - parseDateValue(a.tanggal)) || formatJam(b.jam).localeCompare(formatJam(a.jam)));
 
   // Ringkasan bulan terpilih
   let bm = 0, bk = 0;
@@ -333,7 +341,7 @@ const updateUI = () => {
       : `<button class="hapus" onclick="konfirmasiHapus('${esc(i.id)}')">Hapus</button>`;
     return `<div class="item ${i.pendingDelete ? 'tunda' : ''}">
       <div class="info"><div class="ur">${esc(i.uraian || labelKategori(i.transaksi))}</div>
-      <div class="sub">${esc(labelKategori(i.transaksi))} · ${formatTanggal(i.tanggal)}</div></div>
+      <div class="sub">${esc(labelKategori(i.transaksi))} · ${formatTanggal(i.tanggal)}${formatJam(i.jam) ? ' · ' + formatJam(i.jam) : ''}</div></div>
       <div class="kanan"><div class="jml ${masukJenis ? 'hijau' : 'merah'}">${masukJenis ? '+' : '−'} ${formatRupiah(i.jumlah)}</div>${tombol}</div>
     </div>`;
   }).join('');
@@ -372,6 +380,7 @@ $('formTransaksi').addEventListener('submit', async function (e) {
     action: 'add',
     id: '_' + Math.random().toString(36).substr(2, 9),
     tanggal: $('tanggal').value,
+    jam: jamSekarang(),
     transaksi: $('transaksi').value,
     uraian: $('uraian').value,
     jenis: jenisForm,

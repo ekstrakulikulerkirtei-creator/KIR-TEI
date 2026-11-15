@@ -129,7 +129,7 @@ input,select{width:100%;padding:12px;font:inherit;border:1px solid #b9c2cc;borde
     <form id="formTransaksi">
       <div class="fg">
         <label for="jumlah">Jumlah (Rp)</label>
-        <input type="number" id="jumlah" min="1" required inputmode="numeric" placeholder="Contoh: 25000">
+        <input type="text" id="jumlah" required inputmode="numeric" autocomplete="off" placeholder="Rp 0">
       </div>
       <div class="fg">
         <label for="transaksi">Kategori</label>
@@ -357,8 +357,15 @@ const bukaForm = (jenis) => {
 };
 const tutupForm = () => $('formScreen').classList.add('hidden');
 
+// Format Rp otomatis saat mengetik (contoh: 25000 menjadi Rp 25.000)
+$('jumlah').addEventListener('input', (e) => {
+  const angka = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
+  e.target.value = angka ? 'Rp ' + Number(angka).toLocaleString('id-ID') : '';
+});
+
 $('formTransaksi').addEventListener('submit', async function (e) {
   e.preventDefault();
+  if (!parseInt($('jumlah').value.replace(/\D/g, ''), 10)) { toast('Isi jumlah lebih dari 0.'); return; }
   const btn = $('btnSubmit');
   btn.disabled = true; btn.textContent = 'Menyimpan…';
   const baru = {
@@ -368,7 +375,7 @@ $('formTransaksi').addEventListener('submit', async function (e) {
     transaksi: $('transaksi').value,
     uraian: $('uraian').value,
     jenis: jenisForm,
-    jumlah: parseInt($('jumlah').value),
+    jumlah: parseInt($('jumlah').value.replace(/\D/g, ''), 10),
     pendingDelete: false
   };
   try {

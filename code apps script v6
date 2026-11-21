@@ -1,0 +1,95 @@
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Mencari sheet data (otomatis melewati sheet "Pengaturan")
+  var sheet = ss.getSheets()[0];
+  if (sheet.getName() === "Pengaturan" && ss.getSheets().length > 1) {
+    sheet = ss.getSheets()[1];
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var result = [];
+  
+  if(data.length > 1) {
+    for (var i = 1; i < data.length; i++) {
+      var obj = {};
+      for (var j = 0; j < headers.length; j++) {
+        if(headers[j]) {
+          var key = headers[j].toString().toLowerCase().trim(); 
+          var value = data[i][j];
+          
+          if (Object.prototype.toString.call(value) === '[object Date]') {
+            var format = (key === "jam") ? "HH:mm" : "dd-MM-yyyy";
+            value = Utilities.formatDate(value, Session.getScriptTimeZone(), format);
+          }
+          
+          obj[key] = value;
+        }
+      }
+      result.push(obj);
+    }
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  if (sheet.getName() === "Pengaturan" && ss.getSheets().length > 1) {
+    sheet = ss.getSheets()[1];
+  }
+  
+  var params = JSON.parse(e.postData.contents);
+  
+  // FITUR LOGIN (Mengecek Sel B1)
+  if (params.action === "login") {
+    var settingSheet = ss.getSheetByName("Pengaturan");
+    var truePassword = "1234"; // Default
+    if (settingSheet) {
+      var val = settingSheet.getRange("B1").getValue();
+      if(val) truePassword = val.toString();
+    }
+    if (params.password === truePassword) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error" })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // FITUR VERIFIKASI HAPUS (Mengecek Sel B2)
+  if (params.action === "verify_delete") {
+    var settingSheet = ss.getSheetByName("Pengaturan");
+    var deletePassword = "9999"; // Default PIN hapus
+    if (settingSheet) {
+      var val = settingSheet.getRange("B2").getValue();
+      if(val) deletePassword = val.toString();
+    }
+    if (params.password === deletePassword) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error" })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  
+  // FITUR TAMBAH DATA
+    if (params.action === "add") {
+    sheet.appendRow([params.id, params.tanggal, params.transaksi, params.uraian, params.jenis, params.jumlah]);
+    // Jam disimpan sebagai teks di kolom G agar tidak diubah Sheet menjadi format waktu
+    sheet.getRange(sheet.getLastRow(), 7).setNumberFormat("@").setValue(params.jam || "");
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // FITUR HAPUS DATA
+  if (params.action === "delete") {
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] == params.id) {
+        sheet.deleteRow(i + 1);
+        break;
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ status: "deleted" })).setMimeType(ContentService.MimeType.JSON);
+  }
+}

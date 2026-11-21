@@ -1,1 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keuangan Wirausaha KIR TEI</title>
+<style>
+:root{--biru:#0056b3;--hijau:#157347;--merah:#c62828;--bg:#f4f6f9;--garis:#dde2e8;--teks:#1f2933;--abu:#667085}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--bg);color:var(--teks);font-family:'Segoe UI',Tahoma,Verdana,sans-serif;font-size:16px;line-height:1.4}
+.wrap{max-width:640px;margin:auto}
+.hidden{display:none!important}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #8ab8ee;outline-offset:2px}
 
+/* Kartu & umum */
+.card{background:#fff;border:1px solid var(--garis);border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:600;margin:0 0 6px}
+input,select{width:100%;padding:12px;font:inherit;border:1px solid #b9c2cc;border-radius:8px;background:#fff}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:10px;font-weight:700;color:#fff;background:var(--biru)}
+.btn.abu{background:#e9edf2;color:var(--teks)}
+.btn:disabled{opacity:.6}
+
+/* Header */
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.top h1{margin:0;font-size:22px;color:var(--biru)}
+.top button{border:1px solid var(--garis);background:#fff;border-radius:8px;padding:8px 14px}
+
+/* Saldo */
+.saldo{background:var(--biru);color:#fff;border:0}
+.saldo small{opacity:.85}
+.saldo .angka{font-size:34px;font-weight:800;margin:2px 0 12px}
+.saldo .baris{display:flex;gap:10px}
+.saldo .baris div{flex:1;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 10px;font-size:14px}
+.saldo .baris b{display:block;font-size:16px}
+
+/* Tombol catat */
+.aksi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.aksi .btn{padding:18px 10px;font-size:17px}
+.btn.masuk{background:var(--hijau)}
+.btn.keluar{background:var(--merah)}
+
+/* Ringkasan bulan */
+.bulan-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.bulan-head h2{margin:0;font-size:17px}
+.bulan-head input{width:auto}
+.ringkas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.ringkas div{background:var(--bg);border-radius:8px;padding:10px 4px}
+.ringkas small{display:block;color:var(--abu);font-size:13px}
+.ringkas b{font-size:15px}
+.hijau{color:var(--hijau)}.merah{color:var(--merah)}.biru{color:var(--biru)}
+
+/* Riwayat */
+.cari{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--garis)}
+.item:first-child{border-top:0}
+.item .info{min-width:0}
+.item .ur{font-weight:600;overflow-wrap:anywhere}
+.item .sub{color:var(--abu);font-size:13px}
+.item .kanan{text-align:right;flex-shrink:0}
+.item .jml{font-weight:700;white-space:nowrap}
+.item.tunda .info{text-decoration:line-through;opacity:.6}
+.hapus{margin-top:4px;border:0;background:none;color:var(--merah);font-size:13px;padding:2px 0;text-decoration:underline}
+.batal{margin-top:4px;border:0;background:#ffc107;color:#222;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px}
+.kosong{text-align:center;color:var(--abu);padding:18px 0}
+
+/* Jendela (login, form, PIN hapus) */
+.layar{position:fixed;inset:0;background:rgba(20,30,45,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.layar.penuh{background:var(--bg)}
+.kotak{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:380px;max-height:100%;overflow:auto}
+.kotak h2{margin:0 0 4px;font-size:21px}
+.kotak p.ket{margin:0 0 16px;color:var(--abu)}
+.pin{display:flex;justify-content:center;gap:10px;margin-bottom:16px}
+.pin input{width:56px;height:60px;text-align:center;font-size:26px;font-weight:700;padding:0}
+.galat{color:var(--merah);font-weight:600;margin:12px 0 0;display:none;text-align:center}
+.kotak .btn+.btn{margin-top:10px}
+.baris2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{margin-bottom:14px}
+
+/* Pemberitahuan singkat */
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f2933;color:#fff;padding:12px 20px;border-radius:10px;z-index:99;max-width:90%}
+.foot{text-align:center;color:#98a2b3;font-size:12px;margin:18px 0 6px}
+</style>
+</head>
+<body>
+
+<!-- MASUK -->
+<div id="loginScreen" class="layar penuh">
+  <div class="kotak">
+    <h2>Masuk</h2>
+    <p class="ket">Masukkan 4 angka PIN.</p>
+    <form id="formLogin">
+      <div class="pin">
+        <input type="password" class="log-pin" maxlength="1" required inputmode="numeric" aria-label="PIN angka 1">
+        <input type="password" class="log-pin" maxlength="1" required inputmode="numeric" aria-label="PIN angka 2">
+        <input type="password" class="log-pin" maxlength="1" required inputmode="numeric" aria-label="PIN angka 3">
+        <input type="password" class="log-pin" maxlength="1" required inputmode="numeric" aria-label="PIN angka 4">
+      </div>
+      <button type="submit" class="btn" id="btnLogin">Masuk</button>
+    </form>
+    <p id="pesanError" class="galat"></p>
+  </div>
+</div>
+
+<!-- PIN HAPUS -->
+<div id="deleteScreen" class="layar hidden">
+  <div class="kotak">
+    <h2>PIN untuk menghapus</h2>
+    <p class="ket">Masukkan 4 angka PIN hapus.</p>
+    <form id="formDelete">
+      <div class="pin">
+        <input type="password" class="del-pin" maxlength="1" required inputmode="numeric" aria-label="PIN hapus angka 1">
+        <input type="password" class="del-pin" maxlength="1" required inputmode="numeric" aria-label="PIN hapus angka 2">
+        <input type="password" class="del-pin" maxlength="1" required inputmode="numeric" aria-label="PIN hapus angka 3">
+        <input type="password" class="del-pin" maxlength="1" required inputmode="numeric" aria-label="PIN hapus angka 4">
+      </div>
+      <button type="submit" class="btn merah" style="background:var(--merah)" id="btnVerifyHapus">Hapus data</button>
+      <button type="button" class="btn abu" onclick="tutupModalHapus()">Batal</button>
+    </form>
+    <p id="pesanErrorHapus" class="galat"></p>
+  </div>
+</div>
+
+<!-- FORM CATAT -->
+<div id="formScreen" class="layar hidden">
+  <div class="kotak">
+    <h2 id="judulForm">Catat transaksi</h2>
+    <p class="ket" id="ketForm"></p>
+    <form id="formTransaksi">
+      <div class="fg">
+        <label for="jumlah">Jumlah (Rp)</label>
+        <input type="text" id="jumlah" required inputmode="numeric" autocomplete="off" placeholder="Rp 0">
+      </div>
+      <div class="fg">
+        <label for="transaksi">Kategori</label>
+        <select id="transaksi" required>
+          <option value="" disabled selected>Pilih kategori</option>
+          <option value="Setoran Harian">Setoran Harian</option>
+          <option value="Belanja">Belanja</option>
+          <option value="Keperluan Organisasi">Keperluan Organisasi</option>
+          <option value="Dan Lain-Lain">Lain-lain</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label for="uraian">Keterangan</label>
+        <input type="text" id="uraian" placeholder="Untuk apa? (boleh dikosongkan)">
+      </div>
+      <div class="fg">
+        <label for="tanggal">Tanggal</label>
+        <input type="date" id="tanggal" required>
+      </div>
+      <button type="submit" class="btn" id="btnSubmit">Simpan</button>
+      <button type="button" class="btn abu" onclick="tutupForm()">Batal</button>
+    </form>
+  </div>
+</div>
+
+<!-- APLIKASI -->
+<div id="appContent" class="wrap hidden">
+
+  <div class="top">
+    <h1>Keuangan KIR TEI</h1>
+    <button onclick="logout()">Keluar</button>
+  </div>
+
+  <div class="card saldo">
+    <small>Uang kas saat ini</small>
+    <div class="angka" id="grandTotalSaldo">Rp 0</div>
+    <div class="baris">
+      <div>Total masuk<b id="grandTotalPemasukan">Rp 0</b></div>
+      <div>Total keluar<b id="grandTotalPengeluaran">Rp 0</b></div>
+    </div>
+  </div>
+
+  <div class="aksi">
+    <button class="btn masuk" onclick="bukaForm('PEMASUKAN')">+ Uang masuk</button>
+    <button class="btn keluar" onclick="bukaForm('PENGELUARAN')">− Uang keluar</button>
+  </div>
+
+  <div class="card">
+    <div class="bulan-head">
+      <h2>Ringkasan bulan</h2>
+      <input type="month" id="filterBulan" aria-label="Pilih bulan">
+    </div>
+    <div class="ringkas">
+      <div><small>Masuk</small><b class="hijau" id="totalPemasukan">Rp 0</b></div>
+      <div><small>Keluar</small><b class="merah" id="totalPengeluaran">Rp 0</b></div>
+      <div><small>Selisih</small><b class="biru" id="saldoAkhir">Rp 0</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 12px;font-size:17px">Riwayat transaksi</h2>
+    <div class="cari">
+      <input type="text" id="searchInput" placeholder="Cari keterangan atau nominal" aria-label="Cari">
+      <select id="filterKategori" aria-label="Filter kategori">
+        <option value="">Semua kategori</option>
+        <option value="Setoran Harian">Setoran Harian</option>
+        <option value="Belanja">Belanja</option>
+        <option value="Keperluan Organisasi">Keperluan Organisasi</option>
+        <option value="Dan Lain-Lain">Lain-lain</option>
+      </select>
+    </div>
+    <div id="daftar"><div class="kosong">Memuat data…</div></div>
+  </div>
+
+  <div class="foot">Wirausaha KIR TEI · v2.0</div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwOtH0MSbkyZLIcQaLlnndjvjhOq9AXU-ncUHrnKgOSJCV6OHZ2fyME7aQzFg88gvqt6A/exec";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const postJSON = (data) => fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(data) });
+
+const toast = (pesan) => {
+  const t = $('toast'); t.textContent = pesan; t.classList.remove('hidden');
+  clearTimeout(toast.w); toast.w = setTimeout(() => t.classList.add('hidden'), 2500);
+};
+
+// Kotak PIN: pindah otomatis ke kotak berikutnya
+const setupPin = (selector) => {
+  const boxes = document.querySelectorAll(selector);
+  boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '');
+      if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+    });
+    box.addEventListener('keydown', e => { if (e.key === 'Backspace' && !box.value && i > 0) boxes[i - 1].focus(); });
+  });
+};
+setupPin('.log-pin'); setupPin('.del-pin');
+const bacaPin = (selector) => [...document.querySelectorAll(selector)].map(b => b.value).join('');
+
+// ================== MASUK ==================
+$('formLogin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pin = bacaPin('.log-pin');
+  const err = $('pesanError'), btn = $('btnLogin');
+  if (pin.length < 4) { err.textContent = 'Isi 4 angka PIN.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Memeriksa…'; err.style.display = 'none';
+  try {
+    const res = await postJSON({ action:'login', password:pin });
+    const hasil = await res.json();
+    if (hasil.status === 'success') { sessionStorage.setItem('isLoggedIn','true'); tampilkanAplikasi(); }
+    else { err.textContent = 'PIN salah. Coba lagi.'; err.style.display = 'block'; }
+  } catch (x) { err.textContent = 'Tidak bisa terhubung. Periksa internet Anda.'; err.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = 'Masuk'; }
+});
+
+const tampilkanAplikasi = () => { $('loginScreen').classList.add('hidden'); $('appContent').classList.remove('hidden'); muatDataOnline(); };
+const logout = () => { sessionStorage.removeItem('isLoggedIn'); location.reload(); };
+
+// ================== DATA ==================
+let dataKeuangan = [];
+const hariIni = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+let filterBulan = hariIni().slice(0, 7);
+let filterKategori = '', searchQuery = '', itemHapusAktif = null, jenisForm = '';
+$('filterBulan').value = filterBulan;
+
+const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(n);
+const parseDateValue = (s) => {
+  if (!s) return 0;
+  const str = String(s), p = str.split('-');
+  if (p.length === 3) return p[0].length === 4 ? new Date(p[0], p[1]-1, p[2]).getTime() : new Date(p[2], p[1]-1, p[0]).getTime();
+  return new Date(str).getTime();
+};
+const formatTanggal = (s) => {
+  if (!s) return '-';
+  const str = String(s), p = str.split('-');
+  return (p.length === 3 && p[0].length === 4) ? `${p[2]}-${p[1]}-${p[0]}` : str;
+};
+const jamSekarang = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+const formatJam = (j) => {
+  if (!j) return '';
+  const s = String(j);
+  if (s.includes('T')) { const d = new Date(s); return isNaN(d) ? '' : String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
+  const m = s.match(/^(\d{1,2})[:.](\d{2})/);
+  return m ? m[1].padStart(2,'0') + ':' + m[2] : '';
+};
+const labelKategori = (k) => k === 'Dan Lain-Lain' ? 'Lain-lain' : k;
+
+const muatDataOnline = async () => {
+  try {
+    const res = await fetch(API_URL);
+    dataKeuangan = await res.json();
+    updateUI();
+  } catch (err) {
+    $('daftar').innerHTML = '<div class="kosong merah">Gagal memuat data. Periksa internet lalu muat ulang halaman.</div>';
+  }
+};
+
+const teksTimer = (s) => `Batal (${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')})`;
+
+const updateUI = () => {
+  // Total keseluruhan
+  let masuk = 0, keluar = 0;
+  dataKeuangan.forEach(i => {
+    if (i.pendingDelete) return;
+    if (i.jenis === 'PEMASUKAN') masuk += Number(i.jumlah) || 0;
+    if (i.jenis === 'PENGELUARAN') keluar += Number(i.jumlah) || 0;
+  });
+  $('grandTotalPemasukan').textContent = formatRupiah(masuk);
+  $('grandTotalPengeluaran').textContent = formatRupiah(keluar);
+  $('grandTotalSaldo').textContent = formatRupiah(masuk - keluar);
+
+  const bulanItem = (i) => {
+    const t = parseDateValue(i.tanggal); if (!t) return '';
+    const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  };
+  const diBulan = dataKeuangan
+    .filter(i => filterBulan === '' || bulanItem(i) === filterBulan)
+    .sort((a, b) => (parseDateValue(b.tanggal) - parseDateValue(a.tanggal)) || formatJam(b.jam).localeCompare(formatJam(a.jam)));
+
+  // Ringkasan bulan terpilih
+  let bm = 0, bk = 0;
+  diBulan.forEach(i => {
+    if (i.pendingDelete) return;
+    if (i.jenis === 'PEMASUKAN') bm += Number(i.jumlah) || 0; else bk += Number(i.jumlah) || 0;
+  });
+  $('totalPemasukan').textContent = formatRupiah(bm);
+  $('totalPengeluaran').textContent = formatRupiah(bk);
+  $('saldoAkhir').textContent = formatRupiah(bm - bk);
+
+  // Daftar riwayat (bulan + kategori + pencarian)
+  const q = searchQuery.toLowerCase();
+  const tampil = diBulan.filter(i =>
+    (filterKategori === '' || i.transaksi === filterKategori) &&
+    (formatTanggal(i.tanggal).toLowerCase().includes(q) || (i.uraian && i.uraian.toLowerCase().includes(q)) || (i.jumlah && i.jumlah.toString().includes(q)))
+  );
+
+  if (!tampil.length) { $('daftar').innerHTML = '<div class="kosong">Belum ada transaksi.</div>'; return; }
+
+  $('daftar').innerHTML = tampil.map(i => {
+    const masukJenis = i.jenis === 'PEMASUKAN';
+    const tombol = i.pendingDelete
+      ? `<button id="btn-cancel-${esc(i.id)}" class="batal" onclick="batalHapus('${esc(i.id)}')">${teksTimer(i.timeLeft)}</button>`
+      : `<button class="hapus" onclick="konfirmasiHapus('${esc(i.id)}')">Hapus</button>`;
+    return `<div class="item ${i.pendingDelete ? 'tunda' : ''}">
+      <div class="info"><div class="ur">${esc(i.uraian || labelKategori(i.transaksi))}</div>
+      <div class="sub">${esc(labelKategori(i.transaksi))} · ${formatTanggal(i.tanggal)}${formatJam(i.jam) ? ' · ' + formatJam(i.jam) : ''}</div></div>
+      <div class="kanan"><div class="jml ${masukJenis ? 'hijau' : 'merah'}">${masukJenis ? '+' : '−'} ${formatRupiah(i.jumlah)}</div>${tombol}</div>
+    </div>`;
+  }).join('');
+};
+
+$('filterBulan').addEventListener('change', e => { filterBulan = e.target.value; updateUI(); });
+$('filterKategori').addEventListener('change', e => { filterKategori = e.target.value; updateUI(); });
+$('searchInput').addEventListener('input', e => { searchQuery = e.target.value; updateUI(); });
+
+// ================== TAMBAH TRANSAKSI ==================
+const bukaForm = (jenis) => {
+  jenisForm = jenis;
+  const masuk = jenis === 'PEMASUKAN';
+  $('judulForm').textContent = masuk ? 'Catat uang masuk' : 'Catat uang keluar';
+  $('ketForm').textContent = masuk ? 'Uang yang diterima kas.' : 'Uang yang dipakai dari kas.';
+  $('btnSubmit').style.background = masuk ? 'var(--hijau)' : 'var(--merah)';
+  $('formTransaksi').reset();
+  $('tanggal').value = hariIni();
+  $('formScreen').classList.remove('hidden');
+  setTimeout(() => $('jumlah').focus(), 100);
+};
+const tutupForm = () => $('formScreen').classList.add('hidden');
+
+// Format Rp otomatis saat mengetik (contoh: 25000 menjadi Rp 25.000)
+$('jumlah').addEventListener('input', (e) => {
+  const angka = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
+  e.target.value = angka ? 'Rp ' + Number(angka).toLocaleString('id-ID') : '';
+});
+
+$('formTransaksi').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  if (!parseInt($('jumlah').value.replace(/\D/g, ''), 10)) { toast('Isi jumlah lebih dari 0.'); return; }
+  const btn = $('btnSubmit');
+  btn.disabled = true; btn.textContent = 'Menyimpan…';
+  const baru = {
+    action: 'add',
+    id: '_' + Math.random().toString(36).substr(2, 9),
+    tanggal: $('tanggal').value,
+    jam: jamSekarang(),
+    transaksi: $('transaksi').value,
+    uraian: $('uraian').value,
+    jenis: jenisForm,
+    jumlah: parseInt($('jumlah').value.replace(/\D/g, ''), 10),
+    pendingDelete: false
+  };
+  try {
+    await postJSON(baru);
+    dataKeuangan.push(baru);
+    const bulanBaru = baru.tanggal.slice(0, 7);
+    if (filterBulan !== '' && filterBulan !== bulanBaru) { filterBulan = bulanBaru; $('filterBulan').value = bulanBaru; }
+    updateUI();
+    tutupForm();
+    toast('Tersimpan ✓');
+  } catch (err) { toast('Gagal menyimpan. Periksa internet.'); }
+  finally { btn.disabled = false; btn.textContent = 'Simpan'; }
+});
+
+// ================== HAPUS ==================
+const konfirmasiHapus = (id) => {
+  if (!id || id === 'undefined') { alert('Data ini ditambahkan manual dari Sheet, jadi tidak bisa dihapus di sini.'); return; }
+  itemHapusAktif = id;
+  $('deleteScreen').classList.remove('hidden');
+  document.querySelectorAll('.del-pin').forEach(b => b.value = '');
+  $('pesanErrorHapus').style.display = 'none';
+  setTimeout(() => document.querySelectorAll('.del-pin')[0].focus(), 100);
+};
+const tutupModalHapus = () => $('deleteScreen').classList.add('hidden');
+
+$('formDelete').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pin = bacaPin('.del-pin');
+  const err = $('pesanErrorHapus'), btn = $('btnVerifyHapus');
+  if (pin.length < 4) { err.textContent = 'Isi 4 angka PIN.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Memeriksa…'; err.style.display = 'none';
+  try {
+    const res = await postJSON({ action:'verify_delete', password:pin });
+    const hasil = await res.json();
+    if (hasil.status === 'success') {
+      const id = itemHapusAktif;
+      tutupModalHapus();
+      setTimeout(() => {
+        if (confirm('Yakin ingin menghapus data ini?\nData akan terhapus permanen dalam 30 detik. Selama itu Anda masih bisa menekan Batal.')) jalankanTimerHapus(id);
+      }, 150);
+    } else { err.textContent = 'PIN hapus salah.'; err.style.display = 'block'; }
+  } catch (x) { err.textContent = 'Tidak bisa terhubung. Periksa internet Anda.'; err.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = 'Hapus data'; }
+});
+
+const jalankanTimerHapus = (id) => {
+  const item = dataKeuangan.find(x => String(x.id) === String(id));
+  if (!item) return;
+  item.pendingDelete = true; item.timeLeft = 30;
+  updateUI();
+  item.intervalId = setInterval(async () => {
+    item.timeLeft--;
+    const btn = document.getElementById(`btn-cancel-${item.id}`);
+    if (btn) btn.textContent = teksTimer(item.timeLeft);
+    if (item.timeLeft <= 0) {
+      clearInterval(item.intervalId);
+      try { await postJSON({ action:'delete', id:String(id) }); } catch (x) {}
+      dataKeuangan = dataKeuangan.filter(x => String(x.id) !== String(id));
+      updateUI();
+    }
+  }, 1000);
+};
+
+const batalHapus = (id) => {
+  const item = dataKeuangan.find(x => String(x.id) === String(id));
+  if (!item) return;
+  clearInterval(item.intervalId);
+  item.pendingDelete = false;
+  updateUI();
+};
+
+if (sessionStorage.getItem('isLoggedIn') === 'true') tampilkanAplikasi();
+</script>
+</body>
+</html>
